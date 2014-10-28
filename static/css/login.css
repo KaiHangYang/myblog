@@ -1,0 +1,87 @@
+body, html {
+    margin:0;
+    border:0;
+    padding:0;
+}
+html {
+    background-image: url(../img/loginBG.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+@font-face {
+    font-family: 'iconfont';
+    src: url('../iconfonts/iconfont.eot');
+    src: url('../iconfonts/iconfont.eot?#iefix') format('embedded-opentype'),
+    url('../iconfonts/iconfont.woff') format('woff'),
+    url('../iconfonts/iconfont.ttf') format('truetype'),
+    url('../iconfonts/iconfont.svg#uxiconfont') format('svg');
+}
+#login_form {
+    font-family: '微软雅黑';
+    position: absolute;
+    left:0;right:0;top:0;bottom:0;
+    margin: auto;
+    width: 420px;height: 270px;
+    background-color: rgba(12, 3, 18, 0.6);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+}
+#motto {
+    color: white;
+    font-size: 20px;
+    text-shadow: 0px 0px 6px white;
+}
+#login_head {
+    position: absolute;
+    left: 25px;
+    display: block;
+    font-family: iconfont;
+}
+#login_head span, #login_head p {
+    display: inline-block;
+}
+#login_head span {
+    font-size: 20px;
+}
+input {
+    width: 165px;
+    height: 26px;
+    border: 0;
+    outline: none;
+    background-color: transparent;
+    border:1px rgba(255,255,255,0.6) solid;
+    border-radius: 5px;
+    color: white;
+    padding-left: 10px;
+}
+#account {
+    margin-top: 60px;
+}
+#password {
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+#btn_box {
+    margin-top:15px;
+}
+.btn {
+    width: 77px;
+    height: 34px;
+    position: relative;
+    cursor: pointer;
+    font-size: 17px;
+    padding-left: 0;
+
+    transition: all 160ms ease-in-out;
+}
+.btn:first-child {
+    margin-right: 40px;
+}
+.btn:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: rgba(0, 0, 0, 0.9);
+}
+

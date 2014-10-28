@@ -1,10 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ title }}</title>
-</head>
+{% extends "base.html" %}
+{% block title %} {{ title }} {% end %}
+{% block head %}
+    <link rel="stylesheet" href="{{static_url('css/login.css')}}">
+    <script src="{{static_url('js/login.js')}}"></script>
+{% end %}
+{% block body %}
+<p id="motto">我渴望随着命运指引的方向，心平气和地、没有争吵、悔恨、羡慕，笔直走完人生旅途。 —— 魏尔伦</p>
+<form action="/login" method='POST' id='login_form'>
+    <span id='login_head'>
+        <span>&#xf000b;</span>
+        <p>请登录</p>
+    </span>
+    {% module xsrf_form_html() %}
+    <label>账号：<input type="text" placeholder='输入您的账号' id='account' name='account' autocomplete='off'autofocus/></label>
+    <label>密码：<input type="password" placeholder="输入您的密码" id='password' name='password'autocomplete='off'/></label>
+    <div id="btn_box">
+        <input type="submit" value="提交" id='submit' class="btn"/>
+        <input type="reset" value="重置" id='reset' class="btn"/>
+    </div>
+
+</form>
+{% end %}
 <body>
-    <h2>Welcome login!</h2>
-</body>
+   </body>
 </html>

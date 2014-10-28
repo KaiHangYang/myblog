@@ -5,7 +5,8 @@
 # -------------2014,10,27---------------
 # 这个是使用tornado来写的博客，第一次尝试，我会尽力的～
 import os.path
-
+import torndb
+import md5
 from tornado import web
 from tornado import gen
 from tornado import escape
@@ -17,6 +18,10 @@ define('debug', default=1, type=int, help='Open debug mode or '
        'not(default:enabled), 0 to disable it, 1 to enable it.')
 define('port', default=8888, type=int, help='Set the port '
        'this application listen')
+define('db_user', default='myblog', type=str)
+define('db_pw', default='y1995kh221', type=str)
+define('db_host', default='localhost', type=str)
+define('db_name', default='blog', type=str)
 
 
 class MainApplication(web.Application):
@@ -24,6 +29,7 @@ class MainApplication(web.Application):
         route = [
             [r'/', MainHandler],
             [r'/login', LoginHandler],
+            [r'/logout', LogoutHandler],
             [r'register', RegisterHandler],
             [r'/admin', AdminHandler],
         ]
@@ -33,22 +39,34 @@ class MainApplication(web.Application):
             cookie_secret='My_NAME_IS_KAIHANGYANG_PW_Y1995KH221',
             login_url=r'/login',
             template_path=os.path.join(os.path.dirname(__file__), 'template'),
-            static_path=os.path.join(os.path.dirname(__file__), 'static')
+            static_path=os.path.join(os.path.dirname(__file__), 'static'),
         )
         web.Application.__init__(self, route, **settings)
 
 
+# 添加一个全局的数据库
+        self.db = torndb.Connection(
+             host=options.db_host, database=options.db_name,
+             user=options.db_user, password=options.db_pw
+        )
+
+
 class BaseHandler(web.RequestHandler):
+    @property
+    def db(self):
+        return self.application.db
+
+
     def get_current_user(self):
-        user_id = self.get_secure_cookie('user_id')
-        if not user_id: return None
-        return user_id
+        user = self.get_secure_cookie('user_name')
+        if not user: return None
+        return user
 
 
 class MainHandler(BaseHandler):
     @web.authenticated
     def get(self):
-        self.render('index.html', title='My Blog', user=self.current_user())
+        self.render('index.html', title='My Blog', user=self.current_user)
 
 
 class LoginHandler(BaseHandler):
@@ -56,7 +74,27 @@ class LoginHandler(BaseHandler):
         self.render('login.html', title='Login')
 
     def post(self):
-        pass
+        self.check_xsrf_cookie()
+        try:
+            m = md5.new()
+            account = self.get_body_argument('account')
+            m.update(self.get_body_argument('password'))
+            password = m.hexdigest()
+
+            user = self.db.get('SELECT * FROM user '
+                'WHERE account=%s AND password=%s LIMIT 1',
+                account, password)
+            if user:
+                self.set_secure_cookie('user_name', user.account)
+                self.redirect('/')
+        except:
+            self.write('log failed!')
+
+
+class LogoutHandler(BaseHandler):
+    def get(self):
+        self.clear_cookie("user_name")
+        self.redirect('/')
 
 
 class RegisterHandler(BaseHandler):
