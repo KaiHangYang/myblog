@@ -82,13 +82,18 @@ class LoginHandler(BaseHandler):
             password = m.hexdigest()
 
             user = self.db.get('SELECT * FROM user '
-                'WHERE account=%s AND password=%s LIMIT 1',
-                account, password)
+                'WHERE account=%s LIMIT 1', account)
+#            self.add_header('Content-Type', 'text/plain')
             if user:
-                self.set_secure_cookie('user_name', user.account)
-                self.redirect('/')
+                if user.password != password:
+                    self.write('密码错误!')
+                else:
+                    self.set_secure_cookie('user_name', user.account)
+                    self.redirect('/')
+            else:
+                self.write('用户名不存在！')
         except:
-            self.write('log failed!')
+            self.write('Login Failed!')
 
 
 class LogoutHandler(BaseHandler):
