@@ -7,12 +7,15 @@
 import os.path
 import torndb
 import md5
+import time
 from tornado import web
 from tornado import gen
 from tornado import escape
 from tornado import httpserver
 from tornado import ioloop
 from tornado.options import options, define, parse_command_line
+from concurrent import futures
+from tornado import concurrent
 
 define('debug', default=1, type=int, help='Open debug mode or '
        'not(default:enabled), 0 to disable it, 1 to enable it.')
@@ -66,34 +69,48 @@ class BaseHandler(web.RequestHandler):
 class MainHandler(BaseHandler):
     @web.authenticated
     def get(self):
-        self.render('index.html', title='My Blog', user=self.current_user)
+        self.render('index.html', title='My Blog')
 
 
 class LoginHandler(BaseHandler):
-    def get(self):
-        self.render('login.html', title='Login')
+    executor = futures.ThreadPoolExecutor(4)
 
+    def get(self):
+        if self.get_secure_cookie('user_name'):
+            self.redirect('/')
+        else:
+            self.render('login.html', title='Login')
+
+    @gen.coroutine
     def post(self):
         self.check_xsrf_cookie()
-        try:
+        account = self.get_body_argument('account')
+        password = self.get_body_argument('password')
+        if len(password) != 0:
             m = md5.new()
-            account = self.get_body_argument('account')
-            m.update(self.get_body_argument('password'))
+            m.update(password)
             password = m.hexdigest()
 
-            user = self.db.get('SELECT * FROM user '
-                'WHERE account=%s LIMIT 1', account)
-#            self.add_header('Content-Type', 'text/plain')
-            if user:
-                if user.password != password:
-                    self.write('密码错误!')
-                else:
-                    self.set_secure_cookie('user_name', user.account)
-                    self.redirect('/')
+        user = yield self.check_user(account)
+        self.add_header('Content-Type', 'application/json')
+        if user:
+            if user.password != password and len(password) != 0:
+                print 'text'
+                self.write({'login': False, 'msg': '用户名不存在！'})
+            elif len(password) == 0:
+                self.write({'msg': '密码为空！', 'login': False})
             else:
-                self.write('用户名不存在！')
-        except:
-            self.write('Login Failed!')
+                self.set_secure_cookie('user_name', user.account)
+                self.write({'msg': '登陆成功！', 'login': True})
+        else:
+            self.write({'msg': '用户名不存在！', 'login': False})
+
+    @concurrent.run_on_executor
+    def check_user(self, account):
+        time.sleep(3)
+        user = self.db.get('SELECT * FROM user '
+            'WHERE account=%s LIMIT 1', account)
+        return user
 
 
 class LogoutHandler(BaseHandler):
@@ -104,6 +121,7 @@ class LogoutHandler(BaseHandler):
 
 class RegisterHandler(BaseHandler):
     def get(self):
+        self.write('asd')
         self.render('register.html', title='Header')
 
     def post(self):

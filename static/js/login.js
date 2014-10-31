@@ -9,7 +9,7 @@
     }
 
     //serialize方法来自于 javascript高级程序设计 p356
-    var serialize = function (form) {
+    serialize = function (form) {
         var parts = new Array();
         var field = null;
 
@@ -48,7 +48,6 @@
                     parts.push(encodeURIComponent(field.name)+'='+encodeURIComponent(field.value));
             }
         }
-
         return parts.join('&');
     }
 
@@ -69,6 +68,7 @@
         if (typeof args.data == 'object' && args.data.tagName && args.data.tagName.toLowerCase() == 'form') {
             args.method = args.data.method;
             args.url = args.data.action;
+            args.contentType = 'application/x-www-form-urlencoded';
         }
         else {
             if (typeof args.method == 'undefined' || typeof args.data == 'undefined' || typeof args.url == 'undefined') {
@@ -79,7 +79,6 @@
 
                var xhr = new XMLHttpRequest();
         var data = null;
-
         if (args.contentType != 'application/x-www-form-urlencoded') {
 
             if (args.contentType == 'string') {
@@ -88,38 +87,90 @@
             else if (args.contentType == 'json') {
                 data = JSON.stringify(args.data);
             }
-
+            xhr.open(args.method, args.url, true);
             xhr.setRequestHeader('Content-Type', 'text/plain');
         }
         else {
             data = serialize(args.data);
+            xhr.open(args.method, args.url, true);
             xhr.setRequestHeader('Content-Type', args.contentType);
         }
 
-        xhr.open(args.method, args.url, true);
         xhr.send(data);
 
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && xhr.status >= 200 && xhr.status < 300) {
-                if (xhr.getResponseHeader('Content-type') != 'application/json') {
-                    callback(xhr.responseText);
+                if (xhr.getResponseHeader('Content-type').indexOf('application/json') == -1) {
+                    args.callback(xhr.responseText);
                 }
                 else {
-                    callback(JSON.parse(xhr.responseText));
+                    args.callback(JSON.parse(xhr.responseText));
                 }
             }
         }
     }
+    function keydown(e) {
+        if (e.keyCode == 27) {
+            noteBox.hide();
+        }
+    }
+    var noteBox = {
+        'self': '',
+        'show': function() {
+            window.addEventListener('keydown', keydown);
+            noteBox.self.style.display = 'flex';
+            setTimeout(function(){
+                noteBox.self.style.opacity = 1;
+            }, 100)
+        },
+        'hide': function() {
+
+            window.removeEventListener('keydown', keydown);
+            noteBox.self.style.opacity = 0;
+            setTimeout(function(){
+                noteBox.self.style.display = 'none';
+            }, 300);
+        }
+    }
+    var loading = {
+        'hide': function() {
+            $('#loading_cover').style.opacity = 0;
+            setTimeout(function(){
+                $('#loading_cover').style.display = 'none';
+            }, 300)
+        },
+        'show': function() {
+            $('#loading_cover').style.display = 'flex';
+            setTimeout(function(){
+                $('#loading_cover').style.opacity = 1;
+            }, 100);
+        }
+    }
 
 window.onload = function() {
+    noteBox.self = $('#note_box');
     $('#login_form').onsubmit = function(){
+        
+        loading.show();
         ajax({
             data: $('#login_form'),
             callback: function(data) {
-                document.write(data);
+                loading.hide();
+                $('#note_zone').innerHTML = '<p>'+data.msg+'</p>';
+                noteBox.show();
+                if (data.login) {
+                    setTimeout(function(){
+                        location.href = '/';
+                    }, 600);
+                }
             }
         });
         return false;
     }
+
+    $('#note_btn').onclick = function() {
+        noteBox.hide();
+    }
 }
+
 })();

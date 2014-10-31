@@ -1,6 +1,19 @@
 {% extends "base.html" %}
 {% block title %} {{ title }} {% end %}
+{% block head %}
+    <link rel="stylesheet" href="{{static_url('css/index.css')}}">
+    <script src="{{static_url('js/index.js')}}"></script>
+{% end %}
 {% block body %}
-    <h2>Hello {{ user }}</h2>
-    <a href="/logout">Log Out</a>
+    <header>
+        <p>My Blog Header</p>
+        <a href="/logout">Log Out</a>
+    </header>
+    <nav>
+        <ul>
+            <li>主页</li>
+            <li>设置</li>
+        </ul>
+    </nav>
+    
 {% end %}
