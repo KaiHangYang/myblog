@@ -3,7 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}{% end %}</title>
+    <link rel="stylesheet/less" href="{{static_url('css/common.less')}}">
+    <script src='{{static_url('js/common.js')}}'></script>
     {% block head %}{% end %}
+    <script>
+        less = {
+            env: 'development',
+            async: false,
+            poll: 1000,
+            functions:{},
+            dumpLineNumbers:'comments',
+            relativeUrls: false,
+            rootpath: 'localhost:8888'
+        }
+    </script>
+    <script src='{{static_url('js/less.min.js')}}'></script>
 </head>
 <body>
     {% block body %}{% end %}

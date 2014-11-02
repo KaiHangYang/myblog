@@ -1,0 +1,142 @@
+/*将来那个body和html的高度是要取消的*/
+.bgcolor (@num) when (@num=1) {
+    background-color: #2ecc71;
+}
+.bgcolor (@num) when (@num=2) {
+    background-color: #e74c3c;
+}
+.bgcolor (@num) when (@num=3) {
+    background-color: #3498db;
+}
+.bgcolor (@num) when (@num=4) {
+    background-color: #f1c40f;
+}
+@font1: {
+    font-family: 'LoveloLineBold';
+};
+@font2: {
+    font-family:'loginHead';
+};
+body, html {
+    width: 100%;
+    overflow-x: hidden;
+}
+#main {
+    width: 80%;
+    position: absolute;
+    right: 0;
+}
+header {
+    width: 100%;height: 150px;
+    position: relative;
+    background-color: #1F2036;
+    color: white;
+    &>p {
+        margin: 0;
+        @font1();
+        font-size: 50px;
+        position: relative;
+        top: 40px;
+        left: 45px;
+    }
+    &>span {
+        background-image: url('/static/img/logo.png');
+        background-size: contain;
+        width: 62px;
+        height: 60px;
+        display: block;
+        position: relative;
+        left: 500px;
+    }
+}
+#header_fixed {
+    top: 0;right: 0;
+    position: fixed;
+    height: 50px;width: 80%;
+    z-index: 1;
+    display: none;
+    &>p {
+        font-size: 35px;
+        top: 11px;
+        left: 50px;
+    }
+    &>span {
+        left: 10px;
+        width: 30px;
+        height: 30px;
+        top: -25px;
+    }
+}
+nav {
+    height: 50px;
+    background-color: transparent;
+    position: fixed;
+    z-index: 2;
+    right: 0;top: 0;
+    color: white;
+    &>ul {
+        margin: 0;
+        list-style: none;
+        padding: 0;
+        &>li {
+            padding: 16px;
+            cursor: pointer;
+            -webkit-transition: background-color 200ms ease-in-out;
+            display: inline-block;
+            &:hover {
+                background-color: rgba(128, 128, 128, 0.5);
+            }
+        }
+    }
+    & a {
+        text-decoration: none;
+        color: white;
+    }
+}
+aside {
+    position: fixed;
+    height: 100%;width: 20%;
+    top: 0;
+    box-shadow: 3px 0 5px rgba(145, 145, 145, 0.3);
+    z-index: 3;
+    background-color: #EEEEEE;
+    &>.user_info {
+        &>.user_logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            overflow: hidden;
+            background-color: rgb(112, 213, 182);
+            border: 7px solid rgb(131, 96, 234);
+            box-shadow: inset 0 0 20px rgb(118, 118, 118), 2px 1px 3px rgb(145, 145, 145);
+            -webkit-transition: box-shadow 300ms ease-in-out;
+            &>img {
+                width: 100%;
+                height: 100%;
+            }
+            &:hover {
+                box-shadow: inset 0 0 6px rgb(118, 118, 118), 2px 1px 3px rgb(145, 145, 145);
+            }
+        }
+    }
+}
+article {
+    width: 100%;
+    background-color: #FFFFFF;
+    padding: 20px;
+    box-sizing: border-box;
+}
+.essays {
+    position: absolute;
+    width: 30%;
+    box-shadow: 1px 1px 4px rgba(81, 81, 81, 0.64);
+    .bgcolor(1);
+}
+//暂时的东西
+.generator(@n; @i:1) when (@i <= @n) {
+    #e@{i} {
+        height: @i * 100px;
+    }
+    .generator(@n; (@i+1));
+}
+.generator(8);

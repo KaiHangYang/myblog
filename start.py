@@ -69,7 +69,7 @@ class BaseHandler(web.RequestHandler):
 class MainHandler(BaseHandler):
     @web.authenticated
     def get(self):
-        self.render('index.html', title='My Blog')
+        self.render('index.html', title='My Blog', user_logo='wolf.png')
 
 
 class LoginHandler(BaseHandler):

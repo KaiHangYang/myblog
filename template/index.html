@@ -1,19 +1,77 @@
 {% extends "base.html" %}
 {% block title %} {{ title }} {% end %}
 {% block head %}
-    <link rel="stylesheet" href="{{static_url('css/index.css')}}">
+    <link rel="stylesheet/less" href="{{static_url('css/index.less')}}">
     <script src="{{static_url('js/index.js')}}"></script>
 {% end %}
 {% block body %}
-    <header>
-        <p>My Blog Header</p>
-        <a href="/logout">Log Out</a>
-    </header>
-    <nav>
-        <ul>
-            <li>主页</li>
-            <li>设置</li>
-        </ul>
-    </nav>
-    
+    <div id="main">
+	    <header id="header_unfixed">
+            <p>A Running Wolf</p>
+            <span></span>
+        </header>
+        <header id="header_fixed">
+            <p>A Running Wolf</p>
+            <span></span>
+        </header>
+   
+	    <nav>
+	        <ul>
+                <li>主页</li>
+                <li>设置</li>
+                <li><a href="/logout">退出</a></li>
+	        </ul>
+	    </nav>
+        <article class='wt-container'>
+            <section class='essays wt-item' id='e1'>
+                <div class="essay_num"></div>
+                <div id="essay_shotcut"></div>
+                <div id="essay_title"></div>
+            </section>
+            <section class='essays wt-item' id='e2'>
+                <div class="essay_num"></div>
+                <div id="essay_shotcut"></div>
+                <div id="essay_title"></div>
+            </section>
+            <section class='essays wt-item' id='e3'>
+                <div class="essay_num"></div>
+                <div id="essay_shotcut"></div>
+                <div id="essay_title"></div>
+            </section>
+            <section class='essays wt-item' id='e4'>
+                <div class="essay_num"></div>
+                <div id="essay_shotcut"></div>
+                <div id="essay_title"></div>
+            </section>
+            <section class='essays wt-item' id='e5'>
+                <div class="essay_num"></div>
+                <div id="essay_shotcut"></div>
+                <div id="essay_title"></div>
+            </section>
+            <section class='essays wt-item' id='e6'>
+                <div class="essay_num"></div>
+                <div id="essay_shotcut"></div>
+                <div id="essay_title"></div>
+            </section>
+            <section class='essays wt-item' id='e7'>
+                <div class="essay_num"></div>
+                <div id="essay_shotcut"></div>
+                <div id="essay_title"></div>
+            </section>
+            <section class='essays wt-item' id='e8'>
+                <div class="essay_num"></div>
+                <div id="essay_shotcut"></div>
+                <div id="essay_title"></div>
+            </section>
+        </article>
+    </div>
+    <aside>
+        <div class="user_info">
+            <div class='user_logo'>
+                <img src="{{static_url('user_data/user_logo/'+user_logo)}}" alt="user">
+            </div>
+            <p>the running wolf</p>
+        </div>
+        
+    </aside>
 {% end %}
