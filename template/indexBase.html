@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %} {{ title }} {% end %}
+{% block body %}
+    <div id="main">
+	    <header id="header_unfixed">
+            <p>A Running Wolf</p>
+            <span></span>
+        </header>
+        <header id="header_fixed">
+            <p>A Running Wolf</p>
+            <span></span>
+        </header>
+   
+	    <nav>
+	        <ul>
+                <li>主页</li>
+                <li>设置</li>
+                <li><a href="/logout">退出</a></li>
+	        </ul>
+	    </nav>
+       	{% block article %}
+       	{% end %}
+    </div>
+    <aside>
+        <div class="user_info">
+            <div class='user_logo'>
+                <img src="{{static_url('user_data/user_logo/'+user_logo)}}" alt="user">
+            </div>
+            <p>A Running Wolf</p>
+        </div>
+        
+    </aside>
+{% end %}

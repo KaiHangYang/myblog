@@ -35,6 +35,7 @@ class MainApplication(web.Application):
             [r'/logout', LogoutHandler],
             [r'register', RegisterHandler],
             [r'/admin', AdminHandler],
+            [r'/addarticle', AddArticleHandler],
         ]
         settings = dict(
             debug=True,
@@ -58,7 +59,6 @@ class BaseHandler(web.RequestHandler):
     @property
     def db(self):
         return self.application.db
-
 
     def get_current_user(self):
         user = self.get_secure_cookie('user_name')
@@ -126,6 +126,13 @@ class RegisterHandler(BaseHandler):
 
     def post(self):
         pass
+
+
+class AddArticleHandler(BaseHandler):
+    @web.authenticated
+    def get(self):
+        self.render('addArticle.html', user=self.current_user,
+                    title='Add article', user_logo='wolf.png')
 
 
 class AdminHandler(BaseHandler):

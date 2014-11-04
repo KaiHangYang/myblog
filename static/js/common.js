@@ -19,6 +19,19 @@ css = function (el, cssName) {
     sty = (len==2) ? sty[cssName] : sty;
     return sty;
 }
+hasClass = function(domname, cl) {
+    var doms = $$(domname);
+    var dom, className;
+    for (var i=0; i < doms.length; i++) {
+        dom = doms[i];
+        className = dom.className.split(' ');
+        
+        if (className.indexOf(cl) != -1) {
+            return true;
+        }
+    }
+    return false;
+}
 //serialize方法来自于 javascript高级程序设计 p356
 serialize = function (form) {
     var parts = new Array();

@@ -1,0 +1,26 @@
+{% extends 'indexBase.html' %}
+{% block head %}
+    <link rel="stylesheet/less" href="{{static_url('css/index.less')}}">
+    <link rel="stylesheet/less" href="{{static_url('css/addArticle.less')}}">
+    <link rel="stylesheet" href="{{static_url('css/github-markdown.css')}}">
+    <link rel="stylesheet" href="{{static_url('css/monokai_sublime.min.css')}}">
+    <script src="{{static_url('js/highlight.min.js')}}"></script>
+    <script src="{{static_url('js/indexCommon.js')}}"></script>
+    <script src="{{static_url('js/markdown.min.js')}}"></script>
+    <script src="{{static_url('js/addArticle.js')}}"></script>
+{% end %}
+{% block article %}
+    <article>
+        <section>
+            <div class="markdown-body"></div>
+            <textarea class="edit_block"></textarea>
+        </section>
+    </article>
+    <div id="control_bar">
+        <span>&#xe601;</span>
+    </div>
+    <div id="setting">
+        <div id="setting_save"><p>保存</p></div>
+        <div id="setting_delete"><p>删除</p></div>
+    </div>
+{% end %}
