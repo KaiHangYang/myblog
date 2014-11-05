@@ -45,10 +45,11 @@
 .markdown-body pre {
   overflow: auto;
   width: 70%;
-  position: relative;
+  margin-left: 10px;
+/*  position: relative;
   left: 0;right: 0;
   margin: auto;
-}
+*/}
 
 .markdown-body code,
 .markdown-body kbd,
@@ -164,6 +165,7 @@
 
 .markdown-body blockquote {
   margin: 0;
+  margin-left: 10px;
 }
 
 .markdown-body ul,

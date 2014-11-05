@@ -129,10 +129,59 @@ class RegisterHandler(BaseHandler):
 
 
 class AddArticleHandler(BaseHandler):
+    executor = futures.ThreadPoolExecutor(4)
+
     @web.authenticated
     def get(self):
+        self.set_secure_cookie('timestamp', str(time.time()))
         self.render('addArticle.html', user=self.current_user,
                     title='Add article', user_logo='wolf.png')
+
+    @web.authenticated
+    @gen.coroutine
+    def post(self):
+        self.check_xsrf_cookie()
+        if self.request.headers['Content-Type'].startswith('application/json'):
+            result = yield self.addArticle(self.current_user,
+                     escape.json_decode(self.request.body)['article'])
+        elif self.request.body == 'delete':
+            result = yield self.deleteArticle(self.current_user,
+                     self.get_secure_cookie('timestamp'))
+        else:
+            result = False
+
+        self.write(dict(result=result))
+        self.finish()
+
+    @concurrent.run_on_executor
+    def addArticle(self, user, article):
+        try:
+            timestamp = self.get_secure_cookie('timestamp')
+            if self.db.get('select * from user_article '
+            'where account=%s and timestamp=%s',
+            user, timestamp):
+                self.db.execute('update user_article '
+                'set article=%s where account=%s and timestamp=%s'
+                , article, user, timestamp)
+            else:
+                self.db.execute('INSERT INTO user_article VALUES(%s, %s, %s)',
+                user, article, timestamp)
+        except:
+            return False
+        else:
+            return True
+
+    @concurrent.run_on_executor
+    def deleteArticle(self, user, timestamp):
+        try:
+            if self.db.get('select * from user_article where '
+            'account=%s and timestamp=%s', user, timestamp):
+                self.db.execute('delete from user_article where account=%s '
+                'and timestamp=%s', user, timestamp)
+        except:
+            return False
+        else:
+            return True
 
 
 class AdminHandler(BaseHandler):

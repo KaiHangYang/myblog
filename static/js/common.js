@@ -101,25 +101,28 @@ ajax = function(args) {
         }
     }
 
-           var xhr = new XMLHttpRequest();
+    var xhr = new XMLHttpRequest();
     var data = null;
     if (args.contentType != 'application/x-www-form-urlencoded') {
 
         if (args.contentType == 'string') {
             data = args.data;
+            xhr.open(args.method, args.url, true);
+            xhr.setRequestHeader('X-XSRFToken', getCookie('_xsrf'));
+            xhr.setRequestHeader('Content-Type', 'text/plain');
         }
         else if (args.contentType == 'json') {
             data = JSON.stringify(args.data);
+            xhr.open(args.method, args.url, true);
+            xhr.setRequestHeader('X-XSRFToken', getCookie('_xsrf'));
+            xhr.setRequestHeader('Content-Type', 'application/json');
         }
-        xhr.open(args.method, args.url, true);
-        xhr.setRequestHeader('Content-Type', 'text/plain');
     }
     else {
         data = serialize(args.data);
         xhr.open(args.method, args.url, true);
         xhr.setRequestHeader('Content-Type', args.contentType);
     }
-
     xhr.send(data);
 
     xhr.onreadystatechange = function () {
@@ -132,4 +135,8 @@ ajax = function(args) {
             }
         }
     }
+}
+getCookie = function(name) {
+    var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+    return r ? r[1] : undefined;
 }

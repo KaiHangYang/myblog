@@ -39,15 +39,22 @@ body, html {
   border-radius: 35%;
   -webkit-animation: circSquare 1.5s ease-in-out infinite;
 }
-.btn {
+.btn() {
     width: 77px;
     height: 34px;
     position: relative;
     cursor: pointer;
     font-size: 17px;
-    padding-left: 0;
-
+    border: 0;
+    outline: none;
     transition: all 160ms ease-in-out;
+    border-radius: 3px;
+}
+.btn-a {
+    .btn();
+    background-color: transparent;
+    border: 1px solid white;
+    color: white;
     &:hover {
         background-color: rgba(255, 255, 255, 0.9);
         color: rgba(0, 0, 0, 0.9);
