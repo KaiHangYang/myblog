@@ -2,7 +2,7 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
 <svg xmlns="http://www.w3.org/2000/svg">
 <metadata>
-Created by FontForge 20120731 at Tue Nov  4 23:08:35 2014
+Created by FontForge 20120731 at Fri Nov  7 21:30:28 2014
  By Ads
 </metadata>
 <defs>
@@ -19,7 +19,7 @@ Created by FontForge 20120731 at Tue Nov  4 23:08:35 2014
     bbox="6 -202 1027 819"
     underline-thickness="50"
     underline-position="-100"
-    unicode-range="U+0078-E601"
+    unicode-range="U+0078-E604"
   />
 <missing-glyph horiz-adv-x="374" 
 d="M34 0v682h272v-682h-272zM68 34h204v614h-204v-614z" />
@@ -41,5 +41,13 @@ d="M945 204h-54q-13 -48 -37 -90l50 -50q24 -24 24 -58t-24 -58l-29 -29q-24 -24 -58
 q-24 42 -37 90h-54q-34 0 -58 24t-24 58v40q0 34 24 58t58 24h53q13 48 36 90l-48 48q-24 24 -24 58t24 58l29 29q24 24 58 24t58 -24l47 -47q44 25 93 38v55q0 34 24 58t58 24h41q34 0 58 -24t24 -58v-55q49 -13 93 -38l47 47q24 24 58 24t58 -24l29 -29q24 -24 24 -58
 t-24 -58l-48 -48q23 -42 36 -90h53q34 0 58 -24t24 -58v-40q0 -34 -24 -58t-58 -24zM517 565q-108 0 -184.5 -76t-76.5 -184t76.5 -184.5t184.5 -76.5t184 76.5t76 184.5t-76 184t-184 76zM516.5 205q-42.5 0 -72.5 30t-30 72.5t30 72.5t72.5 30t72.5 -30t30 -72.5
 t-30 -72.5t-72.5 -30z" />
+    <glyph glyph-name="uniE602" unicode="&#xe602;" 
+d="M832 364v-384h-640v640h385l128 128h-513q-53 0 -90.5 -37.5t-37.5 -90.5v-640q0 -53 37.5 -90.5t90.5 -37.5h640q53 0 90.5 37.5t37.5 90.5v384v128zM709 641l107 107l142 -143l-107 -106zM460 250l-44 46l284 284l-26 25l-285 -284l-71 -213l213 71l285 284l-71 71z
+" />
+    <glyph glyph-name="uniE603" unicode="&#xe603;" 
+d="M829 636h-104v51q0 25 -18.5 42.5t-45.5 17.5h-282q-26 0 -45 -17.5t-19 -42.5v-51h-122q-26 0 -45 -17.5t-19 -42.5v-50h765v50q0 25 -19 42.5t-46 17.5zM667 635h-294v55h294v-55zM667 635zM192 467v-17v-116v-464q0 -7 5 -12.5t13 -5.5h605q7 0 12 5.5t5 12.5v464v116
+v17h-640zM364 -34h-58v394h58v-394zM481 -34h-58v394h58v-394zM599 -34h-58v394h58v-394zM716 -34h-58v394h58v-394z" />
+    <glyph glyph-name="uniE604" unicode="&#xe604;" 
+d="M896 236h-320v-320h-128v320h-320v128h320v320h128v-320h320v-128z" />
   </font>
 </defs></svg>

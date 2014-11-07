@@ -12,8 +12,14 @@
 {% block article %}
     <article>
         <section>
+            <textarea id="article_title" class='article_head' placeholder="记下这片博文的主题～"></textarea>
+        </section>
+        <section>
+            <textarea id="brief_intro" class='article_head' placeholder='写下这篇博文的简要介绍～'></textarea>
+        </section>
+        <section>
             <div class="markdown-body"></div>
-            <textarea class="edit_block"></textarea>
+            <textarea class="edit_block" placeholder='博文主体，支持markdown语法呦～'></textarea>
         </section>
     </article>
     <div id="control_bar">

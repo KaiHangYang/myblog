@@ -1,4 +1,28 @@
 function a(){
+    (function init() {
+        if (location.pathname == '/addarticle') {
+            return;
+        }
+        else {
+            ajax({
+                url: '/edit1',
+                method: 'post',
+                contentType: 'string',
+                data:'',
+                callback: function(data) {
+                    if (data.success) {
+                        $('#article_title').value = data.content.title;
+                        $('#brief_intro').value = data.content.brief_intro;
+                        $('.edit_block').value = data.content.article;
+                        setTimeout(function(){$('.edit_block').oninput()}, 100);
+                    }
+                    else {
+                        location.href = '/';
+                    }
+                }
+            });
+        }
+    })();
     var timeout = -1;
     function insertTab(e, el) {
         var content, blankNum;
@@ -31,7 +55,7 @@ function a(){
         }
     }
     $('.edit_block').onfocus = function() {
-        document.documentElement.scrollTop = 100;
+        document.documentElement.scrollTop = 200;
     }
     $('.edit_block').oninput = function() {
         clearTimeout(timeout);
@@ -85,7 +109,7 @@ function a(){
                 method: 'post',
                 url: '/addarticle',
                 contentType: 'json',
-                data:{article:$('.edit_block').value},
+                data:{article:$('.edit_block').value, title:$('#article_title').value, brief_intro:$('#brief_intro').value},
                 callback: function(data){
                     console.log(data);
                 }

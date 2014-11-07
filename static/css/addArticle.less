@@ -1,3 +1,31 @@
+.article_head {
+    border-radius: 5px 5px 0px 0px;
+    height: 50px;
+    position: relative;
+    color: rgb(232, 232, 232);
+    outline: none;
+    text-indent: 1em;
+    box-sizing: border-box;
+    padding-top: 10px;
+    resize: none;
+}
+#article_title {
+    border: 0;
+    width: 65%;height: 45px;
+    background-color: rgba(134, 59, 203, 0.83);
+    box-shadow: 1px 0px 5px rgb(124, 107, 107);
+    &::-webkit-input-placeholder {
+        color: #81CDC1;
+    }
+}
+#brief_intro {
+    width: 80%;
+    background-color: rgb(91, 152, 149);
+    box-shadow: 1px 0px 6px rgba(56, 56, 56, 0.68);
+    &::-webkit-input-placeholder {
+        color: #FFCA58;
+    }
+}
 section {
     width: 100%;
     display: flex;
@@ -15,7 +43,7 @@ section {
 }
 .markdown-body {
     width: 50%;height: 585px;
-    box-shadow: -1px 1px 5px rgb(168, 168, 168);
+    box-shadow: -2px 2px 5px rgb(168, 168, 168);
     display: inline-block;
     overflow-y: auto;
     border: 1px solid rgb(221, 221, 221);

@@ -140,3 +140,46 @@ getCookie = function(name) {
     var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
     return r ? r[1] : undefined;
 }
+createDom = function(domname, attr) {
+    var dom = document.createElement(domname);
+    if (typeof attr == 'undefined') {
+        return dom;
+    }
+    else {
+        for ( var i in attr ) {
+            dom.setAttribute(i, attr[i]);
+        }
+
+        return dom;
+    }
+}
+addClass = function(doms, classname) {
+    if (!(doms instanceof NodeList)) {
+        doms = new Array(doms);
+    }
+
+    for (var i=0; i < doms.length; i++) {
+        doms[i].className += ' '+classname;
+    }
+}
+removeClass = function(doms, classname) {
+    if (!(doms instanceof NodeList)) {
+        doms = new Array(doms);
+    }
+    if (!(classname instanceof Array)) {
+        classname = new Array(classname);
+    }
+    var tmpclass;
+    for (var i=0; i < doms.length; i++) {
+        tmpclass = doms[i].className.split(' ');
+
+        doms[i].className = tmpclass.filter(function(item, index, array){
+            for (var i=0; i < classname.length; i++) {
+                if (item == classname[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }).join(' ');
+    }
+}
