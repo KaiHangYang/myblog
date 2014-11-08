@@ -60,7 +60,7 @@
 
         return section;
     }
-    function init_article() {
+    function init_article(cb) {
         ajax({
             url: '/',
             method: 'post',
@@ -77,6 +77,7 @@
                     if (finished) {
                         waterfall.init();
                         clearInterval(checkInterval);
+                        cb();
                     }
                 }, 100);
             }
@@ -90,8 +91,9 @@
             data: {act: 'del', timestamp: timestamp},
             callback: function(data) {
                 if (data.success) {
-                    init_article();
-                    setTimeout(function(){$('#manage_bar').click();}, 100);
+                    init_article(function(){
+                        $('#manage_bar').click();
+                    });
                 }
                 else {
                     location.href = '/';
@@ -125,7 +127,7 @@
     }
 	window.addEventListener('load', function(){
 
-        init_article();
+        init_article(function(){return});
         window.addEventListener('resize', function() {
         	waterfall.resize();
     	});

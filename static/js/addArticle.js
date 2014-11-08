@@ -1,5 +1,55 @@
-function a(){
-    (function init() {
+function insertTab(e, el) {
+    var content, blankNum;
+    if (e) {
+        content = '        ';
+        blankNum = 8;
+
+    }
+    else {
+        content = '    ';
+        blankNum = 4;
+    }
+    var start = el.selectionStart;
+    var text1 = el.value.substr(0, start);
+    var text2 = el.value.substr(el.selectionEnd);
+    el.value = text1 + content  + text2;
+    el.setSelectionRange(start+blankNum, start+blankNum);
+    $('.edit_block').oninput();
+}
+function backspace(e, el) {
+    var str = el.value.substr(el.selectionStart-4, 4);
+    if (str == '    ') {
+        e.preventDefault();
+        var start = el.selectionStart-4;
+        var text1 = el.value.substr(0, start);
+        var text2 = el.value.substr(start+4);
+        el.value = text1 + text2;
+        el.setSelectionRange(start, start);
+        $('.edit_block').oninput();
+    }
+}
+var makesure = {
+    show: function(msg, okFunc, cancelFunc) {
+        $('.makesure>div>span').innerHTML = msg;
+        $('.makesure input[value=确定]').onclick = okFunc;
+        $('.makesure input[value=取消]').onclick = cancelFunc;
+        $('.makesure').style.display = 'block';
+        setTimeout(function(){
+            $('.makesure').style.opacity = 1;
+        }, 100);
+    },
+    hide: function() {
+        $('.makesure>div>span').innerHTML = '';
+        $('.makesure input[value=确定]').onclick = null;
+        $('.makesure input[value=取消]').onclick = null;
+        $('.makesure').style.opacity = 0;
+        setTimeout(function(){
+            $('.makesure').style.display = 'none';
+        }, 300)
+    }
+}
+function init(){
+    (function(){
         if (location.pathname == '/addarticle') {
             return;
         }
@@ -24,36 +74,7 @@ function a(){
         }
     })();
     var timeout = -1;
-    function insertTab(e, el) {
-        var content, blankNum;
-        if (e) {
-            content = '        ';
-            blankNum = 8;
-
-        }
-        else {
-            content = '    ';
-            blankNum = 4;
-        }
-        var start = el.selectionStart;
-        var text1 = el.value.substr(0, start);
-        var text2 = el.value.substr(el.selectionEnd);
-        el.value = text1 + content  + text2;
-        el.setSelectionRange(start+blankNum, start+blankNum);
-        $('.edit_block').oninput();
-    }
-    function backspace(e, el) {
-        var str = el.value.substr(el.selectionStart-4, 4);
-        if (str == '    ') {
-            e.preventDefault();
-            var start = el.selectionStart-4;
-            var text1 = el.value.substr(0, start);
-            var text2 = el.value.substr(start+4);
-            el.value = text1 + text2;
-            el.setSelectionRange(start, start);
-            $('.edit_block').oninput();
-        }
-    }
+    
     $('.edit_block').onfocus = function() {
         document.documentElement.scrollTop = 200;
     }
@@ -79,60 +100,69 @@ function a(){
             backspace(e, $('.edit_block'));
         } 
     });
-    $('#control_bar').onclick =  function(e){
-        e.stopPropagation();
-        var setting = $('#setting');
-        var opacity;
-        if (this.hide || typeof this.hide == 'undefined') {
+    $('.setting_bar').addEventListener('click', function(){
+        if (typeof this.hide == 'undefined' || this.hide == true) {
             this.hide = false;
-            opacity = 1;
-
+            removeClass($$('.bar'), ['bar_initial']);
         }
         else {
             this.hide = true;
-            opacity = 0;
+            addClass($$('.bar'), ['bar_initial']);
         }
-        if (this.hide) {
-            setTimeout(function(){
-                setting.style.display = 'none';
-            }, 200);
-        }
-        else {
-            setting.style.display = 'block';
-        }
-        setting.style.opacity = opacity;
-    };
-    $('#setting').onclick = function(e) {
-        e.stopPropagation();
-        if (e.target.innerText == '保存') {
+    });
+    $('.back_bar').onclick = function() {
+        makesure.show('保存并返回首页？', function(){
+            makesure.hide();
             ajax({
-                method: 'post',
                 url: '/addarticle',
+                method: 'post',
                 contentType: 'json',
-                data:{article:$('.edit_block').value, title:$('#article_title').value, brief_intro:$('#brief_intro').value},
+                data: {article:$('.edit_block').value, title:$('#article_title').value, brief_intro:$('#brief_intro').value},
                 callback: function(data){
-                    console.log(data);
+                    if (data.result) {
+                        location.href = '/';
+                    }
+                    else {
+                        makesure.show('保存失败了。。。', makesure.hide, makesure.hide);
+                    }
                 }
             });
-        }
-        else {
+        }, makesure.hide);
+    }
+    $('.delete_bar').onclick = function() {
+        makesure.show('要删除这篇博文吗?', function(){
+            makesure.hide();
             ajax({
-                method:'post',
                 url: '/addarticle',
+                method: 'post',
                 contentType: 'string',
                 data: 'delete',
                 callback: function(data) {
                     if (data.result) {
                         location.href = '/';
                     }
+                    else {
+                        makesure.show('删除失败了。。。', makesure.hide, makesure.hide);
+                    }
                 }
             });
-        }
+        }, makesure.hide);
     }
-    window.addEventListener('click', function(){
-        if (!$('#control_bar').hide&& typeof $('#control_bar').hide != 'undefined') {
-            $('#control_bar').onclick(event);
-        }
-    });
+    $('.save_bar').onclick = function() {
+        ajax({
+            url: '/addarticle',
+            method: 'post',
+            contentType: 'json',
+            data: {article:$('.edit_block').value, title:$('#article_title').value, brief_intro:$('#brief_intro').value},
+            callback: function(data) {
+                if (data.result) {
+                    makesure.show('保存成功～', makesure.hide, makesure.hide);
+                }
+                else {
+                    makesure.show('保存失败了。。。', makesure.hide, makesure.hide);
+                }
+            }
+        });
+    }
 }
-window.onload = a;
+window.onload = init;

@@ -32,6 +32,16 @@ body, html {
         transform: rotate(1turn);
     }
 }
+@-webkit-keyframes  bar {
+    50% {
+        -webkit-transform: rotate(0.5turn);
+        background-color: #202020;
+        color: #FFFFFF;
+    }
+    100% {
+        -webkit-transform: rotate(1turn);
+    }
+}
 .loading {
   width: 2em;
   height: 2em;
@@ -59,4 +69,55 @@ body, html {
         background-color: rgba(255, 255, 255, 0.9);
         color: rgba(0, 0, 0, 0.9);
     }
+}
+.bar_common() {
+    width:  45px;height: 45px;
+    bottom: 10px;
+    cursor: pointer;
+    font-family: 'iconfont';
+    border-radius: 50%;
+    position: fixed;
+    box-sizing: border-box;
+    text-align: center;
+    color: rgb(227, 230, 195);
+    -webkit-transition: right 300ms ease-in-out;
+    &:hover {
+        -webkit-animation: bar 2s ease-in-out;
+    }
+}
+.setting_bar {
+    right: 10px;
+    font-size: 30px;
+    background-color: rgb(67, 164, 168);
+    z-index: 1;
+    padding-top: 6.4px;
+    .bar_common();
+}
+.back_bar {
+    font-size: 30px;
+    background-color: rgb(18, 53, 85);
+    right: 10px;
+    padding-top: 6px;
+    .bar_common();
+}
+.save_bar {
+    .bar_common();
+    font-size: 30px;
+    background-color: green;
+    padding-top: 6px;
+    right: 130px;
+    background-color: rgb(217, 116, 43);
+}
+.delete_bar {
+    .bar_common();
+    right: 70px;
+    font-size: 30px;
+    background-color: rgb(209, 73, 78);
+    padding-top: 6px;
+}
+.edit_bar {
+    .bar_common();
+    background-color: rgb(104, 123, 75);
+    font-size: 30px;
+    padding-top: 6px;
 }

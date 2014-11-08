@@ -51,65 +51,33 @@ section {
 .markdown-body>* {
     white-space: pre;
 }
-#control_bar {
-    width: 50px;height: 50px;
-    background-color: #4285F4;
-    position: fixed;
-    bottom: 10px; right: 10px;
-    -webkit-transition: background-color 200ms ease-in-out;
-    -webkit-user-select: none;
-    &>span {
-        margin: auto;
-        font-size: 35px;
-        position: absolute;
-        font-family: 'iconfont';
-        width: 35px;height: 38px;
-        left: 0;right: 0;top: 0;bottom: 0;
-        color: rgba(255, 255, 255, 0.76);
-        cursor: pointer;
-    }
-    &:hover {
-        background-color: #2A56C6;
-    }
-    border-radius: 50%;
+.setting_bar {
+    right: 9.5px;bottom: 9.5px;
+    width: 47px; height: 47px;
+    padding-top: 7px;
 }
-#setting {
-        width: 150px;height: 100px;
-        position: fixed;
-        bottom: 50px;right: 50px;
-        border-radius: 6px 6px 0px 6px;
-        box-sizing: border-box;
-        padding: 6px 6px;
-        display: none; opacity: 0;
-        -webkit-transition: all 100ms ease-in-out;
-        &>div {
-            box-sizing: border-box;
-            padding: 14px;
-            width: 100%;height: 50%;
-            text-align: center;
-            background-color: #EEE;
-            border-radius: 5px;
-            margin: 1px;
-            cursor: pointer;
-            -webkit-transition: all 300ms ease-in-out;
-            &>p {
-                margin: 0;
-                color: rgb(98, 98, 98);
-            }
-            &:hover {
-                background-color: white;
-                color: black;
-            }
-        }
+.back_bar {
+    right: 70px;
 }
-#makesure {
+.delete_bar {
+    right: 130px;
+}
+.save_bar {
+    right: 190px;
+}
+.bar_initial {
+    right: 10px;
+}
+.makesure {
     width: 100%;height: 100%;
     position: fixed;
     z-index: 10;
     top: 0;bottom: 0;right: 0;left: 0;
     margin: auto;
     background-color: rgba(2, 2, 2, 0.6);
+    -webkit-transition: opacity 300ms ease-in-out 100ms;
     display: none;
+    opacity: 0;
     &>div {
         width: 300px;height: 200px;
         position: absolute;

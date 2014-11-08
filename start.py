@@ -127,7 +127,6 @@ class LoginHandler(BaseHandler):
         self.add_header('Content-Type', 'application/json')
         if user:
             if user.password != password and len(password) != 0:
-                print 'text'
                 self.write({'login': False, 'msg': '用户名不存在！'})
             elif len(password) == 0:
                 self.write({'msg': '密码为空！', 'login': False})
@@ -303,7 +302,6 @@ class ArticleManageHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         req = escape.json_decode(self.request.body)
-        print req
         if req['act'] == 'del':
             result = yield self.art_delete(self.current_user, req['timestamp'])
             if result:
