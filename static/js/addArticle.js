@@ -149,6 +149,7 @@ function init(){
         }, makesure.hide);
     }
     $('.save_bar').onclick = function() {
+        $('.loading').style.display = 'block';
         ajax({
             url: '/addarticle',
             method: 'post',
@@ -156,9 +157,11 @@ function init(){
             data: {article:$('.edit_block').value, title:$('#article_title').value, brief_intro:$('#brief_intro').value},
             callback: function(data) {
                 if (data.result) {
+                    $('.loading').style.display = 'none';
                     makesure.show('保存成功～', makesure.hide, makesure.hide);
                 }
                 else {
+                    $('.loading').style.display = 'none';
                     makesure.show('保存失败了。。。', makesure.hide, makesure.hide);
                 }
             }
