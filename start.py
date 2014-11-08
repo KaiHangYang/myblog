@@ -252,6 +252,7 @@ class EditArticleHandler(BaseHandler):
     @web.authenticated
     @gen.coroutine
     def post(self, useless):
+        self.check_xsrf_cookie()
         account = self.current_user
         timestamp = self.get_secure_cookie('timestamp')
         result = yield self.get_article(account, timestamp)
@@ -301,6 +302,7 @@ class ArticleManageHandler(BaseHandler):
     @web.authenticated
     @gen.coroutine
     def post(self):
+        self.check_xsrf_cookie()
         req = escape.json_decode(self.request.body)
         if req['act'] == 'del':
             result = yield self.art_delete(self.current_user, req['timestamp'])
