@@ -2,11 +2,20 @@
 {% block head %}
     <link rel="stylesheet/less" href="{{static_url('css/index.less')}}">
     <script src="{{static_url('js/indexCommon.js')}}"></script>
+    {% if admin %}
+    <script src="{{static_url('js/adminIndex.js')}}"></script>
+    {% else %}
     <script src="{{static_url('js/index.js')}}"></script>
+    {% end %}
 {% end %}
 {% block article %}
 	<article class='wt-container'>
     </article>
+    {% if admin %}
     <div id="manage_bar" class='bar_common'>&#xe601;</div>
     <div id="add_bar" class='bar_common'>&#xe604;</div>
+    {% end %}
+    {% if not admin %}
+    {% module xsrf_form_html() %}
+    {% end %}
 {% end %}

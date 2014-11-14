@@ -42,10 +42,10 @@ class MainApplication(web.Application):
     def __init__(self):
         route = [
             [r'/', MainHandler],
+            [r'/admin', AdminHandler],
             [r'/login', LoginHandler],
             [r'/logout', LogoutHandler],
             [r'register', RegisterHandler],
-            [r'/admin', AdminHandler],
             [r'/addarticle', AddArticleHandler],
             [r'/edit([0-9\.]*)', EditArticleHandler],
             [r'/article/([0-9\.]*)', ShowArticleHandler],
@@ -83,9 +83,41 @@ class BaseHandler(web.RequestHandler):
 class MainHandler(BaseHandler):
     executor = futures.ThreadPoolExecutor(4)
 
+    def get(self):
+        # 这个只是临时这样的
+        self.current_owner = self.db.get('select account from '
+                                   'user where admin=1')['account']
+
+        if not self.current_owner:
+            self.write('/博主很懒还没开始写呢～')
+        else:
+            self.set_secure_cookie('owner_name', self.current_owner)
+            self.render('index.html', title='A running wolf\'s blog',
+                        admin=0, user_logo='wolf.png')
+
+    @gen.coroutine
+    def post(self):
+        if self.request.body == 'show':
+            articles = yield self.get_articles()
+            self.write(articles)
+
+    @concurrent.run_on_executor
+    def get_articles(self):
+        articles = self.db.query('select title,brief_intro,timestamp'
+                                 ' from user_article where account=%s',
+                                 self.get_secure_cookie('owner_name'))
+        articles = dict(zip(range(len(articles)), articles))
+        articles['length'] = len(articles)
+        return articles
+
+
+class AdminHandler(BaseHandler):
+    executor = futures.ThreadPoolExecutor(4)
+
     @web.authenticated
     def get(self):
-        self.render('index.html', title='My Blog', user_logo='wolf.png')
+        self.render('index.html', title='My Blog', user_logo='wolf.png',
+                    admin=1)
 
     @web.authenticated
     @gen.coroutine
@@ -109,7 +141,7 @@ class LoginHandler(BaseHandler):
 
     def get(self):
         if self.get_secure_cookie('user_name'):
-            self.redirect('/')
+            self.redirect('/admin')
         else:
             self.render('login.html', title='Login')
 
@@ -147,7 +179,7 @@ class LoginHandler(BaseHandler):
 class LogoutHandler(BaseHandler):
     def get(self):
         self.clear_cookie("user_name")
-        self.redirect('/')
+        self.redirect('/admin')
 
 
 class RegisterHandler(BaseHandler):
@@ -166,7 +198,7 @@ class AddArticleHandler(BaseHandler):
     def get(self):
         self.set_secure_cookie('timestamp', str(time.time()))
         self.render('addArticle.html', user=self.current_user,
-                    title='Add article', user_logo='wolf.png')
+                    title='Add article', user_logo='wolf.png', admin=1)
 
     @web.authenticated
     @gen.coroutine
@@ -244,7 +276,7 @@ class EditArticleHandler(BaseHandler):
                        timestamp):
             self.set_secure_cookie('timestamp', timestamp)
             self.render('addArticle.html', user=self.current_user,
-                        title='Edit Article', user_logo='wolf.png')
+                        title='Edit Article', user_logo='wolf.png', admin=1)
         else:
             self.set_status(404)
             self.write('404 not found')
@@ -277,14 +309,23 @@ class ShowArticleHandler(BaseHandler):
         self.static_path = options.static_path
 
     def get(self, timestamp):
+        query = 'select account from user where account=%s'
+        if not self.current_user or not self.db.get(query, self.current_user):
+            current_user = self.db.get('select * from user where admin=1'
+                                       ' limit 1')['account']
+            admin = 0
+        else:
+            current_user = self.current_user
+            admin = 1
+
         if self.db.get('select account from user_article '
-                       'where account=%s and timestamp=%s', self.current_user,
+                       'where account=%s and timestamp=%s', current_user,
                        timestamp):
             loader = template.Loader('')
             self.write(loader.load(os.path.join(options.article_path,
-                self.get_secure_cookie('user_name')+timestamp+
-                '.html')).generate(title='test', static_url=self.static_url,
-                                   user_logo='wolf.png'))
+                current_user+timestamp+'.html')).generate(title='test',
+                static_url=self.static_url,
+                user_logo='wolf.png', admin=admin))
         else:
             self.set_status(404)
             self.write('404 not found')
@@ -338,21 +379,14 @@ class ArticleManageHandler(BaseHandler):
     def art_edit(self, user, timestamp):
         try:
             result = self.db.get('select timestamp from user_article where '
-                                 'account=%s and timestamp=%s', user, timestamp)
+                                 'account=%s and timestamp=%s', user,
+                                 timestamp)
             if result:
                 return result
             else:
                 return False
         except:
             return False
-
-
-class AdminHandler(BaseHandler):
-    def get(self):
-        self.render('admin.html', title='Admin')
-
-    def post(self):
-        pass
 
 
 def main():

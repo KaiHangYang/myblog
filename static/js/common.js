@@ -9,7 +9,7 @@ $$ = function(dom){
 //这个方法法中的那个滤镜和float没太弄懂
 css = function (el, cssName) {
     var len=arguments.length, sty, f, fv;
-    'currentStyle' in el ? sty=el.currentStyle : 'getComputedStyle' in window ? sty=window.getComputedStyle(el,null) : null;
+    ('currentStyle' in el) ? sty=el.currentStyle : 'getComputedStyle' in window ? sty=window.getComputedStyle(el,null) : null;
     if(cssName==="opacity" && document.all) {
         f = el.filters;
         f && f.length>0 && f.alpha ? fv=f.alpha.opacity/100 : fv=1;                 

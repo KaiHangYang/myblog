@@ -50,7 +50,7 @@ window.onload = function() {
                 noteBox.show();
                 if (data.login) {
                     setTimeout(function(){
-                        location.href = '/';
+                        location.href = '/admin';
                     }, 600);
                 }
             }

@@ -5,7 +5,11 @@
     <link rel="stylesheet" href="{{static_url('css/github-markdown.css')}}">
     <link rel="stylesheet" href="{{static_url('css/monokai_sublime.min.css')}}">
     <script src="{{static_url('js/highlight.min.js')}}"></script>
+    {% if admin %}
+    <script src="{{static_url('js/adminArticle.js')}}"></script>
+    {% else %}
     <script src="{{static_url('js/article.js')}}"></script>
+    {% end %}
     <script src="{{static_url('js/indexCommon.js')}}"></script>
 {% end %}
 {% block article %}
@@ -13,8 +17,10 @@
 		{% block art_content %}
 		{% end %}
     </article>
-    <div class="setting_bar">&#xe601;</div>
     <div class="back_bar bar bar_initial">&#xe605;</div>
-    <div class="edit_bar bar bar_initial">&#xe602;</div>
-    <div class="delete_bar bar bar_initial">&#xe603;</div>
+    {% if admin %}
+        <div class="setting_bar">&#xe601;</div>
+        <div class="edit_bar bar bar_initial">&#xe602;</div>
+        <div class="delete_bar bar bar_initial">&#xe603;</div>
+    {% end %}
 {% end %}

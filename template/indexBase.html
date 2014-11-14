@@ -13,8 +13,12 @@
    
 	    <nav>
 	        <ul>
-                <li><a href="/">主页</a></li>
-                <li><a href="/logout">退出</a></li>
+                {% if admin %}
+                    <li><a href="/admin">主页</a></li>
+                    <li><a href="/logout">退出</a></li>
+                {% else %}
+                    <li><a href="/">主页</a></li>
+                {% end %}
 	        </ul>
 	    </nav>
        	{% block article %}

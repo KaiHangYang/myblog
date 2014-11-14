@@ -1,6 +1,6 @@
-function insertTab(e, el) {
+function insertTab(shift, el) {
     var content, blankNum;
-    if (e) {
+    if (shift) {
         content = '        ';
         blankNum = 8;
 
@@ -67,14 +67,13 @@ function init(){
                         setTimeout(function(){$('.edit_block').oninput()}, 100);
                     }
                     else {
-                        location.href = '/';
+                        location.href = '/admin';
                     }
                 }
             });
         }
     })();
     var timeout = -1;
-    
     $('.edit_block').onfocus = function() {
         document.documentElement.scrollTop = 200;
     }
@@ -100,6 +99,26 @@ function init(){
             backspace(e, $('.edit_block'));
         } 
     });
+    $('#article_title').onblur = function() {
+        if (this.value != '') {
+            var edit = $('.edit_block');
+            var head = this.value + '\n===';
+            var edit_head = edit.value.split('\n', 2);
+            var len = 1;
+            if (edit_head.length == 2 && edit_head[1].indexOf('===') != -1) {
+                edit_head.forEach(function(value){
+                    len += value.length;
+                })
+            }
+            else {
+                head += '\n';
+                len = 0;
+            }
+            edit.setRangeText(head, 0 , len);
+            edit.oninput();
+
+        }
+    }
     $('.setting_bar').addEventListener('click', function(){
         if (typeof this.hide == 'undefined' || this.hide == true) {
             this.hide = false;
@@ -120,7 +139,7 @@ function init(){
                 data: {article:$('.edit_block').value, title:$('#article_title').value, brief_intro:$('#brief_intro').value},
                 callback: function(data){
                     if (data.result) {
-                        location.href = '/';
+                        location.href = '/admin';
                     }
                     else {
                         makesure.show('保存失败了。。。', makesure.hide, makesure.hide);
@@ -139,7 +158,7 @@ function init(){
                 data: 'delete',
                 callback: function(data) {
                     if (data.result) {
-                        location.href = '/';
+                        location.href = '/admin';
                     }
                     else {
                         makesure.show('删除失败了。。。', makesure.hide, makesure.hide);

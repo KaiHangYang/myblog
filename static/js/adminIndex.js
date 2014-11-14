@@ -43,12 +43,18 @@
         var section = createDom('section', {class: 'essays wt-item', time_stamp: data.timestamp});
         var essay_shortcut = createDom('div', {class: 'essay_shortcut'});
         var essay_title = createDom('div', {class: 'essay_title'});
+        var manage_cover = createDom('div', {class: 'manage_cover'}),
+            del = createDom('span', {class: 'del'}),
+            edit = createDom('span', {class: 'edit'});
 
-        essay_shortcut.innerHTML = data.brief_intro;
-        essay_title.innerHTML = data.title;
-
-        console.log(data.brief_intro);
+        essay_shortcut.innerText = data.brief_intro;
+        essay_title.innerText = data.title;
+        del.innerHTML = '&#xe603;';
+        edit.innerHTML = '&#xe602;';
         
+        manage_cover.appendChild(del);
+        manage_cover.appendChild(edit);
+        section.appendChild(manage_cover);
         section.appendChild(essay_shortcut);
         section.appendChild(essay_title);
 
@@ -56,7 +62,7 @@
     }
     function init_article(cb) {
         ajax({
-            url: '/',
+            url: '/admin',
             method: 'post',
             contentType: 'string',
             data: 'show',
@@ -74,6 +80,40 @@
                         cb();
                     }
                 }, 100);
+            }
+        })
+    }
+    function article_del(timestamp) {
+        ajax({
+            url: '/manage',
+            method: 'post',
+            contentType: 'json',
+            data: {act: 'del', timestamp: timestamp},
+            callback: function(data) {
+                if (data.success) {
+                    init_article(function(){
+                        $('#manage_bar').click();
+                    });
+                }
+                else {
+                    location.href = '/admin';
+                }
+            }
+        })
+    }
+    function article_edit(timestamp) {
+        ajax({
+            url: '/manage',
+            method: 'post',
+            contentType: 'json',
+            data: {act: 'edit', timestamp: timestamp},
+            callback: function(data) {
+                if (data.success) {
+                    location.href = '/edit'+data.content.timestamp;
+                }
+                else {
+                    location.href = '/admin'
+                }
             }
         })
     }
@@ -95,5 +135,39 @@
             waterfall.resize();
         }
         $('article').addEventListener('click', article_show);
+        $('article').addEventListener('click', function(e) {
+            if (e.target.className == 'del') {
+                e.stopPropagation();
+                article_del(e.target.parentNode.parentNode.getAttribute('time_stamp'));
+            }
+            else if (e.target.className == 'edit') {
+                e.stopPropagation();
+                article_edit(e.target.parentNode.parentNode.getAttribute('time_stamp'));
+            }
+        });
+        $('#manage_bar').addEventListener('click', function(e){
+            e.stopPropagation();
+            var doms = $$('.manage_cover');
+            for (var i=0; i < doms.length; i++) {
+                doms[i].style.display = 'block';
+            }
+            $('article').removeEventListener('click', article_show);
+            addClass($$('section'), 'article_shake cursor_normal');
+            function windowClick(e) {
+                window.removeEventListener('click', windowClick);
+                var doms = $$('.manage_cover');
+                for (var i=0; i < doms.length; i++) {
+                    doms[i].style.display = 'none';
+                }
+                $('article').addEventListener('click', article_show);
+                removeClass($$('section'), ['article_shake', 'cursor_normal']);
+            }
+
+            window.addEventListener('click', windowClick);
+        });
+        $('#add_bar').addEventListener('click', function() {
+            location.href = '/addarticle';
+        });
     });
+    
 })();
