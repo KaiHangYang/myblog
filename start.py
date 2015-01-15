@@ -37,9 +37,24 @@ define('template_path', default=os.path.join(os.path.dirname(__file__),
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+settings = dict(
+    debug=True,
+    xsrf_cookies=True,
+    cookie_secret='My_NAME_IS_KAIHANGYANG_PW_Y1995KH221',
+    login_url=r'/login',
+    template_path=options.template_path,
+    static_path=options.static_path,
+)
+
+db_info = dict(
+    db_host=options.db_host, db_name=options.db_name,
+    db_user=options.db_user, db_pw=options.db_pw
+)
+article_path = options.article_path
+
 
 class MainApplication(web.Application):
-    def __init__(self):
+    def __init__(self, settings, db_info, article_path):
         route = [
             [r'/', MainHandler],
             [r'/admin', AdminHandler],
@@ -51,28 +66,32 @@ class MainApplication(web.Application):
             [r'/article/([0-9\.]*)', ShowArticleHandler],
             [r'/manage', ArticleManageHandler],
         ]
-        settings = dict(
-            debug=True,
-            xsrf_cookies=True,
-            cookie_secret='My_NAME_IS_KAIHANGYANG_PW_Y1995KH221',
-            login_url=r'/login',
-            template_path=options.template_path,
-            static_path=options.static_path,
-        )
+
         web.Application.__init__(self, route, **settings)
 
 
 # 添加一个全局的数据库
         self.db = torndb.Connection(
-             host=options.db_host, database=options.db_name,
-             user=options.db_user, password=options.db_pw
+             host=db_info['db_host'], database=db_info['db_name'],
+             user=db_info['db_user'], password=db_info['db_pw'],
         )
+
+        self.article_path = article_path
+        self.static_path = settings['static_path']
 
 
 class BaseHandler(web.RequestHandler):
     @property
     def db(self):
         return self.application.db
+
+    @property
+    def article_path(self):
+        return self.application.article_path
+
+    @property
+    def static_path(self):
+        return self.application.static_path
 
     def get_current_user(self):
         user = self.get_secure_cookie('user_name')
@@ -223,7 +242,7 @@ class AddArticleHandler(BaseHandler):
     def addArticle(self, user, article, title, brief_intro):
         try:
             timestamp = self.get_secure_cookie('timestamp')
-            fname = options.article_path+'/'+user+timestamp+'.html'
+            fname = self.article_path+'/'+user+timestamp+'.html'
             if self.db.get('select * from user_article '
             'where account=%s and timestamp=%s',
             user, timestamp):
@@ -257,7 +276,7 @@ class AddArticleHandler(BaseHandler):
             'account=%s and timestamp=%s', user, timestamp):
                 self.db.execute('delete from user_article where account=%s '
                 'and timestamp=%s', user, timestamp)
-                fname = options.article_path+'/'+user+timestamp+'.html'
+                fname = self.article_path+'/'+user+timestamp+'.html'
                 if os.path.exists(fname):
                     os.remove(fname)
         except:
@@ -305,9 +324,6 @@ class EditArticleHandler(BaseHandler):
 
 
 class ShowArticleHandler(BaseHandler):
-    def initialize(self):
-        self.static_path = options.static_path
-
     def get(self, timestamp):
         query = 'select account from user where account=%s'
         if not self.current_user or not self.db.get(query, self.current_user):
@@ -322,7 +338,7 @@ class ShowArticleHandler(BaseHandler):
                        'where account=%s and timestamp=%s', current_user,
                        timestamp):
             loader = template.Loader('')
-            self.write(loader.load(os.path.join(options.article_path,
+            self.write(loader.load(os.path.join(self.article_path,
                 current_user+timestamp+'.html')).generate(title='test',
                 static_url=self.static_url,
                 user_logo='wolf.png', admin=admin))
@@ -366,7 +382,7 @@ class ArticleManageHandler(BaseHandler):
         try:
             self.db.execute('delete from user_article where '
                             'account=%s and timestamp=%s', user, timestamp)
-            fname = os.path.join(options.article_path, user+timestamp+'.html')
+            fname = os.path.join(self.article_path, user+timestamp+'.html')
             if os.path.exists(fname):
                 os.remove(fname)
 
@@ -391,7 +407,7 @@ class ArticleManageHandler(BaseHandler):
 
 def main():
     parse_command_line()
-    server = httpserver.HTTPServer(MainApplication())
+    server = httpserver.HTTPServer(MainApplication(settings, db_info, article_path))
     server.listen(options.port)
     ioloop.IOLoop.current().start()
 
