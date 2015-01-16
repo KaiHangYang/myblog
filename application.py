@@ -116,9 +116,10 @@ class MainHandler(BaseHandler):
                                         i['timestamp'])[0]['article']
                 f = open(fname, 'w')
                 content = markdown.markdown(content)
-                f.write('{%'+' extends "../../../template/showarticle.html" '
-                        '%}{% block art_content %}' + content +
-                        '{%'+'end %}')
+                f.write('{% extends "'+os.path.join(os.path.dirname(__file__),
+                        '/template/showarticle.html')+
+                        '" %}{% block art_content %}' + content
+                        +'{% end %}')
                 f.close()
                 articles.append(i)
 
@@ -236,8 +237,9 @@ class AddArticleHandler(BaseHandler):
                 ' account=%s and timestamp=%s'
                 , article, title, brief_intro, user, timestamp)
                 f = open(fname, 'w')
-                f.write('{% extends "../../../template/showarticle.html" %}'
-                        '{% block art_content %}'+markdown.markdown(article)+
+                f.write('{% extends "'+os.path.join(os.path.dirname(__file__),
+                                                  '/template/showarticle.html')+
+                        '" %}{% block art_content %}'+markdown.markdown(article)+
                         '{% end %}')
                 f.close()
             else:
@@ -245,7 +247,8 @@ class AddArticleHandler(BaseHandler):
                                 'VALUES(%s,%s,%s,%s,%s)', user, article,
                                 timestamp, title, brief_intro)
                 f = open(fname, 'w')
-                f.write('{% extends "../../../template/showarticle.html" %}'
+                f.write('{% extends "'+os.path.join(os.path.dirname(__file__),
+                        '/root/Web/blog/template/showarticle.html')+'" %}'
                         '{% block art_content %}'+markdown.markdown(article)+
                         '{% end %}')
                 f.close()
@@ -333,9 +336,9 @@ class ShowArticleHandler(BaseHandler):
 
     def static_url(self, str):
         if str.startswith('/'):
-            return '/'+self.static_path+str
+            return '../'+'static'+str
         else:
-            return '/'+self.static_path+'/'+str
+            return '../'+'static/'+str
 
 
 class ArticleManageHandler(BaseHandler):
