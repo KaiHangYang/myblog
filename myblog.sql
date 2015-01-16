@@ -66,7 +66,7 @@ CREATE TABLE `user_article` (
 
 LOCK TABLES `user_article` WRITE;
 /*!40000 ALTER TABLE `user_article` DISABLE KEYS */;
-INSERT INTO `user_article` VALUES ('907987244','修改方案\n---\n\n1. 刚才看了下发现可以通过把MainHandler和AdminHandler交换来实现\n2. 不过又发现了一点，就是我的客户端是通过MainHandler的post来ajax请求的所以会有些问题。\n2. 所以如果想进行全面的更改需要连带客户端的请求加以改变。\n\n>所以说加油吧\n\n用来测试看看怎么样的\n不知道跪了没\n不知道怎么样呢','1415636373.9','博客修改建议','11.11凌晨我所想到的博客修改方案');
+INSERT INTO `user_article` VALUES ('907987244','修改方案\n---\n\n1. 刚才看了下发现可以通过把MainHandler和AdminHandler交换来实现\n2. 不过又发现了一点，就是我的客户端是通过MainHandler的post来ajax请求的所以会有些问题。\n2. 所以如果想进行全面的更改需要连带客户端的请求加以改变。\n\n>所以说加油吧\n\n用来测试看看怎么样的\n不知道跪了没\n不知道怎么样呢','1415636373.9','博客修改建议','11.11凌晨我所想到的博客修改方案'),('907987244','在来看看啦\n===\n没事干了；啊','1421386266.67','在来看看啦','尝试着看是不是有问题'),('907987244','终于搭好了\n===\n加油了哈\n还要复习啊，任务还是挺重的呢','1421386695.93','终于搭好了','哈哈，搭好了以后就要继续扩展功能了啊'),('907987244','还有新的想法\n===\n\n把url用`MD5 hash`一下吧','1421386792.37','还有新的想法','想把文章的显示使用MD5做一个hash然后再作为url'),('907987244','终于在iptables的帮助下和一篇博客上找到了方法\n===\n我所说的一篇[博文](http://lyp0909.blog.51cto.com/508999/509408)讲的还不错呢。','1421407892.17','终于在iptables的帮助下和一篇博客上找到了方法','反向代理实现的防止别人通过端口访问'),('907987244','下来就是我想要的那个东西了～～\n===\n试试','1421408112.72','下来就是我想要的那个东西了～～','试下网页截图啦～');
 /*!40000 ALTER TABLE `user_article` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -79,4 +79,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-01-15 22:27:03
+-- Dump completed on 2015-01-16  9:16:23

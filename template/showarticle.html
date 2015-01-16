@@ -1,7 +1,12 @@
 {% extends "/root/Web/blog/template/indexBase.html" %}
 {% block head %}
+    {% if dev %}
     <link rel="stylesheet/less" href="{{static_url('css/index.less')}}">
     <link rel="stylesheet/less" href="{{static_url('css/article.less')}}">
+    {% else %}
+    <link rel="stylesheet" href="{{static_url('css/index.css')}}">
+    <link rel="stylesheet" href="{{static_url('css/article.css')}}">
+    {% end %}
     <link rel="stylesheet" href="{{static_url('css/github-markdown.css')}}">
     <link rel="stylesheet" href="{{static_url('css/monokai_sublime.min.css')}}">
     <script src="{{static_url('js/highlight.min.js')}}"></script>

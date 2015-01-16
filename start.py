@@ -17,9 +17,9 @@ from tornado.options import (
 
 import application
 
-define('debug', default=1, type=int, help='Open debug mode or '
-       'not(default:enabled), 0 to disable it, 1 to enable it.')
-define('port', default=8888, type=int, help='Set the port '
+define('debug', default=True, type=bool, help='Open debug mode or '
+       'not(default:enabled), false to disable it, true to enable it.')
+define('port', default=8000, type=int, help='Set the port '
        'this application listen')
 define('db_user', default='myblog', type=str)
 define('db_pw', default='y1995kh221', type=str)
@@ -31,6 +31,8 @@ define('static_path', default=os.path.join(os.path.dirname(__file__), 'static')
        )
 define('template_path', default=os.path.join(os.path.dirname(__file__),
                                              'template'))
+define('dev', default=True, type=bool, help='develop env?')
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -39,7 +41,7 @@ def main():
     parse_command_line()
 
     settings = dict(
-        debug=True,
+        debug=options.debug,
         xsrf_cookies=True,
         cookie_secret='My_NAME_IS_KAIHANGYANG_PW_Y1995KH221',
         login_url=r'/login',
@@ -52,7 +54,8 @@ def main():
     )
     article_path = options.article_path
 
-    app = application.MainApplication(settings, db_info, article_path)
+    app = application.MainApplication(settings, db_info, article_path,
+                                      options.dev)
     server = httpserver.HTTPServer(app)
     server.listen(options.port)
     ioloop.IOLoop.current().start()

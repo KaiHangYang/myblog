@@ -1,6 +1,10 @@
 {% extends "/root/Web/blog/template/indexBase.html" %}
 {% block head %}
+    {% if dev %}
     <link rel="stylesheet/less" href="{{static_url('css/index.less')}}">
+    {% else %}
+    <link rel="stylesheet" href="{{static_url('css/index.css')}}">
+    {% end %}
     <script src="{{static_url('js/indexCommon.js')}}"></script>
     {% if admin %}
     <script src="{{static_url('js/adminIndex.js')}}"></script>

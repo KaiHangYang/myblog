@@ -20,7 +20,7 @@ from tornado import (
 
 
 class MainApplication(web.Application):
-    def __init__(self, settings, db_info, article_path):
+    def __init__(self, settings, db_info, article_path, dev):
         route = [
             [r'/', MainHandler],
             [r'/admin', AdminHandler],
@@ -44,6 +44,7 @@ class MainApplication(web.Application):
 
         self.article_path = article_path
         self.static_path = settings['static_path']
+        self.dev = dev
 
 
 class BaseHandler(web.RequestHandler):
@@ -58,6 +59,10 @@ class BaseHandler(web.RequestHandler):
     @property
     def static_path(self):
         return self.application.static_path
+
+    @property
+    def dev(self):
+        return self.application.dev
 
     def get_current_user(self):
         user = self.get_secure_cookie('user_name')
@@ -79,7 +84,7 @@ class MainHandler(BaseHandler):
             self.set_secure_cookie('owner_name', self.current_owner)
             if not self.current_user:
                 self.render('index.html', title='A running wolf\'s blog',
-                            admin=0, user_logo='wolf.png')
+                            admin=0, user_logo='wolf.png', dev=self.dev)
             else:
                 self.redirect('/admin')
 
@@ -131,7 +136,7 @@ class AdminHandler(MainHandler):
     @web.authenticated
     def get(self):
         self.render('index.html', title='My Blog', user_logo='wolf.png',
-                    admin=1)
+                    admin=1, dev=self.dev)
 
     @web.authenticated
     @gen.coroutine
@@ -148,7 +153,7 @@ class LoginHandler(BaseHandler):
         if self.get_secure_cookie('user_name'):
             self.redirect('/admin')
         else:
-            self.render('login.html', title='Login')
+            self.render('login.html', title='Login', dev=self.dev)
 
     @gen.coroutine
     def post(self):
@@ -175,7 +180,6 @@ class LoginHandler(BaseHandler):
 
     @concurrent.run_on_executor
     def check_user(self, account):
-        time.sleep(3)
         user = self.db.get('SELECT * FROM user '
             'WHERE account=%s LIMIT 1', account)
         return user
@@ -190,7 +194,7 @@ class LogoutHandler(BaseHandler):
 class RegisterHandler(BaseHandler):
     def get(self):
         self.write('asd')
-        self.render('register.html', title='Header')
+        self.render('register.html', title='Header', dev=self.dev)
 
     def post(self):
         pass
@@ -203,7 +207,8 @@ class AddArticleHandler(BaseHandler):
     def get(self):
         self.set_secure_cookie('timestamp', str(time.time()))
         self.render('addArticle.html', user=self.current_user,
-                    title='Add article', user_logo='wolf.png', admin=1)
+                    title='Add article', user_logo='wolf.png', admin=1,
+                    dev=self.dev)
 
     @web.authenticated
     @gen.coroutine
@@ -283,7 +288,8 @@ class EditArticleHandler(BaseHandler):
                        timestamp):
             self.set_secure_cookie('timestamp', timestamp)
             self.render('addArticle.html', user=self.current_user,
-                        title='Edit Article', user_logo='wolf.png', admin=1)
+                        title='Edit Article', user_logo='wolf.png', admin=1,
+                        dev=self.dev)
         else:
             self.set_status(404)
             self.write('404 not found')
@@ -322,14 +328,15 @@ class ShowArticleHandler(BaseHandler):
             current_user = self.current_user
             admin = 1
 
-        if self.db.get('select account from user_article '
+        article = self.db.get('select title, account from user_article '
                        'where account=%s and timestamp=%s', current_user,
-                       timestamp):
+                       timestamp)
+        if article:
             loader = template.Loader('')
             self.write(loader.load(os.path.join(self.article_path,
-                current_user+timestamp+'.html')).generate(title='test',
-                static_url=self.static_url,
-                user_logo='wolf.png', admin=admin))
+                current_user+timestamp+'.html')).generate(title=article['title']
+                , static_url=self.static_url,
+                user_logo='wolf.png', admin=admin, dev=self.dev))
         else:
             self.set_status(404)
             self.write('404 not found')

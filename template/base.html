@@ -3,9 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}{% end %}</title>
+    {% if dev %}
     <link rel="stylesheet/less" href="{{static_url('css/common.less')}}">
+    {% else %}
+    <link rel="stylesheet" href="{{static_url('css/common.css')}}">
+    {% end %}
     <script src='{{static_url('js/common.js')}}'></script>
     {% block head %}{% end %}
+    
+    {% if dev %}
     <script>
         less = {
             env: 'development',
@@ -18,6 +24,7 @@
         }
     </script>
     <script src='{{static_url('js/less.min.js')}}'></script>
+    {% end %}
 </head>
 <body>
     {% block body %}{% end %}
