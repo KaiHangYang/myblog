@@ -1,2 +1,0 @@
-create table user(account varchar(12) not null primary key, password varchar(32), Email varchar(25) unique, Admin int(1) default 0);
-create table user_article(account varchar(12) not null, article text, timestamp varchar(15) not null, title varchar(30) not null, brief_intro varchar(100) not null, foreign key(account) references user(account));
