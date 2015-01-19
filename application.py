@@ -437,7 +437,7 @@ class ArticleManageHandler(BaseHandler):
 
 
 class PageShotHandler(BaseHandler):
-    executor = futures.ThreadPoolExecutor(4)
+    executor = futures.ThreadPoolExecutor(1)
 
     @gen.coroutine
     def get(self):
@@ -457,7 +457,8 @@ class PageShotHandler(BaseHandler):
             self.set_header('Content-Type', 'image/jpeg')
             self.write(result['pic'])
         else:
-            self.set_status('404', '没有这张图片啦 ╮(╯▽╰)╭')
+            self.set_status(404, '没有这张图片啦 ╮(╯▽╰)╭')
+            self.write('404 没有这张图片啦 ╮(╯▽╰)╭')
 
     @concurrent.run_on_executor
     def get_shot(self, user, userdir, picpath, timestamp):
@@ -465,7 +466,7 @@ class PageShotHandler(BaseHandler):
         if not os.path.exists(userdir):
             os.mkdir(userdir)
 
-        dbexist = self.get('select title from user_article where account=%s '
+        dbexist = self.db.get('select title from user_article where account=%s '
                            'and timestamp=%s', user, timestamp)
 
         if not os.path.exists(picpath) and dbexist:
