@@ -17,6 +17,7 @@ from tornado.options import (
 
 import application
 
+filename = os.path.dirname(__file__)
 define('debug', default=True, type=bool, help='Open debug mode or '
        'not(default:enabled), false to disable it, true to enable it.')
 define('port', default=8000, type=int, help='Set the port '
@@ -25,13 +26,14 @@ define('db_user', default='myblog', type=str)
 define('db_pw', default='y1995kh221', type=str)
 define('db_host', default='localhost', type=str)
 define('db_name', default='blog', type=str)
-define('article_path', default=os.path.join(os.path.dirname(__file__),
-      'static/user_data/user_article'))
-define('static_path', default=os.path.join(os.path.dirname(__file__), 'static')
-       )
-define('template_path', default=os.path.join(os.path.dirname(__file__),
-                                             'template'))
+define('article_path', default=os.path.join(filename,
+                                            'static/user_data/user_article'))
+
+define('static_path', default=os.path.join(filename, 'static'))
+define('template_path', default=os.path.join(filename, 'template'))
 define('dev', default=True, type=bool, help='develop env?')
+define('shot_path', default=os.path.join(filename,
+                                         'static/user_data/user_shots'))
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -54,8 +56,10 @@ def main():
     )
     article_path = options.article_path
 
-    app = application.MainApplication(settings, db_info, article_path,
+    app = application.MainApplication(settings, db_info,
+                                      article_path, options.shot_path,
                                       options.dev)
+
     server = httpserver.HTTPServer(app)
     server.listen(options.port)
     ioloop.IOLoop.current().start()

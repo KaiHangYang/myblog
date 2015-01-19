@@ -43,7 +43,7 @@
         var section = createDom('section', {class: 'essays wt-item', time_stamp: data.timestamp});
         var essay_shortcut = createDom('div', {class: 'essay_shortcut'});
         var essay_title = createDom('div', {class: 'essay_title'});
-        var img = createDom('img', {class: 'essay_shot', src: '/shot?timestamp='+data.timestamp+'&title='+data.title});
+        var img = createDom('img', {class: 'essay_shot', src: '/pageshot?timestamp='+data.timestamp});
         essay_shortcut.innerHTML = data.brief_intro;
         essay_shortcut.appendChild(img);
         essay_title.innerHTML = data.title;
