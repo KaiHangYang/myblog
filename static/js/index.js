@@ -43,11 +43,10 @@
         var section = createDom('section', {class: 'essays wt-item', time_stamp: data.timestamp});
         var essay_shortcut = createDom('div', {class: 'essay_shortcut'});
         var essay_title = createDom('div', {class: 'essay_title'});
-
+        var img = createDom('img', {class: 'essay_shot', src: '/shot?timestamp='+data.timestamp+'&title='+data.title});
         essay_shortcut.innerHTML = data.brief_intro;
+        essay_shortcut.appendChild(img);
         essay_title.innerHTML = data.title;
-
-        console.log(data.brief_intro);
         
         section.appendChild(essay_shortcut);
         section.appendChild(essay_title);
@@ -61,6 +60,7 @@
             contentType: 'string',
             data: 'show',
             callback: function(data){
+
                 var finished = false;
                 $('article').innerHTML = '';
                 for (var i=0; i < data.length; i++) {
@@ -80,6 +80,9 @@
     function article_show(e) {
         if (e.target.className.indexOf('essays') != -1) {
             location.href = '/article/'+e.target.getAttribute('time_stamp');
+        }
+        else if (e.target.className.indexOf('essay_shot') != -1) {
+            location.href = '/article/'+e.target.parentNode.parentNode.getAttribute('time_stamp');
         }
         else if (e.target.className.indexOf('essay') != -1) {
             location.href = '/article/'+e.target.parentNode.getAttribute('time_stamp');

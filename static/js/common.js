@@ -123,10 +123,19 @@ ajax = function(args) {
         xhr.open(args.method, args.url, true);
         xhr.setRequestHeader('Content-Type', args.contentType);
     }
+
+    if (typeof args.responseType != 'undefined') {
+        xhr.responseType = args.responseType;
+    }
     xhr.send(data);
 
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4 && xhr.status >= 200 && xhr.status < 300) {
+            
+            if (typeof args.responseType != 'undefined') {
+                args.callback(xhr.response);
+                return;
+            }
             if (xhr.getResponseHeader('Content-type').indexOf('application/json') == -1) {
                 args.callback(xhr.responseText);
             }
@@ -182,4 +191,31 @@ removeClass = function(doms, classname) {
             return true;
         }).join(' ');
     }
+}
+getShotPic = function(title, timestamp, cb) {
+    ajax({
+        url: '/pageshot',
+        method: 'post',
+        contentType: 'json',
+        responseType: 'blob',
+        data: {
+            title: title,
+            timestamp: timestamp
+        },
+        callback: function(data) {
+            var img = new Image();
+            img.onload = function() {
+                window.URL.revokeObjectURL(img.src);
+                cb(img);
+            }
+            img.src = window.URL.createObjectURL(data);
+        }
+    });
+}
+//这个功能暂时还没扩展 暂时只用HTMLEvents吧兼容性没考虑 时间够再说
+eventTrigger = function(e, dom) {
+    var event = document.createEvent('HTMLEvents');
+    event.initEvent(e, true, true);
+    dom.dispatchEvent(event);
+    delete event;
 }

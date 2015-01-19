@@ -45,9 +45,11 @@
         var essay_title = createDom('div', {class: 'essay_title'});
         var manage_cover = createDom('div', {class: 'manage_cover'}),
             del = createDom('span', {class: 'del'}),
-            edit = createDom('span', {class: 'edit'});
+            edit = createDom('span', {class: 'edit'}),
+            img = createDom('img', {class: 'essay_shot', src: '/shot?timestamp='+data.timestamp+'&title='+data.title});
 
         essay_shortcut.innerText = data.brief_intro;
+        essay_shortcut.appendChild(img);
         essay_title.innerText = data.title;
         del.innerHTML = '&#xe603;';
         edit.innerHTML = '&#xe602;';
@@ -120,6 +122,9 @@
     function article_show(e) {
         if (e.target.className.indexOf('essays') != -1) {
             location.href = '/article/'+e.target.getAttribute('time_stamp');
+        }
+        else if (e.target.className.indexOf('essay_shot') != -1) {
+            location.href = '/article/'+e.target.parentNode.parentNode.getAttribute('time_stamp');
         }
         else if (e.target.className.indexOf('essay') != -1) {
             location.href = '/article/'+e.target.parentNode.getAttribute('time_stamp');

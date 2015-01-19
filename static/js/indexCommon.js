@@ -14,6 +14,12 @@
         }
     }
     window.addEventListener('load', function(){
+        if (location.pathname == '/' || location.pathname == '/admin') {
+            setInterval(function(){
+                eventTrigger('resize', window);
+            }, 1000);
+        }
+        
 		window.addEventListener('scroll', function(){
 	        var top = document.documentElement.scrollTop;
 	        if (top <= 90) {
