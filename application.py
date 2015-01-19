@@ -112,7 +112,6 @@ class MainHandler(BaseHandler):
         return articles
 
     def article_check(self, article):
-        print article
         articles = []
         owner_name = self.get_secure_cookie('owner_name')
         for i in article:
@@ -128,7 +127,7 @@ class MainHandler(BaseHandler):
                 f = open(fname, 'w')
                 content = markdown.markdown(content)
                 f.write('{% extends "'+os.path.join(os.path.dirname(__file__),
-                        '/template/showarticle.html')+
+                        'template/showarticle.html')+
                         '" %}{% block art_content %}' + content
                         +'{% end %}')
                 f.close()
@@ -249,7 +248,7 @@ class AddArticleHandler(BaseHandler):
                 , article, title, brief_intro, user, timestamp)
                 f = open(fname, 'w')
                 f.write('{% extends "'+os.path.join(os.path.dirname(__file__),
-                                                  '/template/showarticle.html')+
+                                                  'template/showarticle.html')+
                         '" %}{% block art_content %}'+markdown.markdown(article)+
                         '{% end %}')
                 f.close()
@@ -267,7 +266,7 @@ class AddArticleHandler(BaseHandler):
                                 timestamp, title, brief_intro)
                 f = open(fname, 'w')
                 f.write('{% extends "'+os.path.join(os.path.dirname(__file__),
-                        '/root/Web/blog/template/showarticle.html')+'" %}'
+                        'template/showarticle.html')+'" %}'
                         '{% block art_content %}'+markdown.markdown(article)+
                         '{% end %}')
                 f.close()
@@ -348,11 +347,19 @@ class ShowArticleHandler(BaseHandler):
             current_user = self.current_user
             admin = 1
 
-        article = self.db.get('select title, account from user_article '
+        article = self.db.get('select * from user_article '
                        'where account=%s and timestamp=%s', current_user,
                        timestamp)
         if article:
             loader = template.Loader('')
+            filename = os.path.join(self.article_path, article['account']+
+                                    article['timestamp']+'.html')
+            if not os.path.exists(filename):
+                with open(filename, 'w') as f:
+                    f.write('{% extends "'+os.path.join(os.path.dirname(__file__),
+                            'template/showarticle.html')+'" %}'
+                            '{% block art_content %}'+markdown.markdown(article)+
+                            '{% end %}')
             self.write(loader.load(os.path.join(self.article_path,
                 current_user+timestamp+'.html')).generate(title=article['title']
                 , static_url=self.static_url,
@@ -400,7 +407,7 @@ class ArticleManageHandler(BaseHandler):
             picname = md5.new()
             picname.update(timestamp)
             picname = picname.hexdigest()
-            picpath = os.path.join(self.shot_path, user, timestamp)
+            picpath = os.path.join(self.shot_path, user, picname)
 
             fname = os.path.join(self.article_path, user+timestamp+'.html')
 
@@ -465,7 +472,7 @@ class PageShotHandler(BaseHandler):
             os.system('xvfb-run cutycapt --url=http://localhost/article/' +
                       timestamp+' --out='+picpath+'.jpg;mv '+picpath+'.jpg ' +
                       picpath +
-                      ';convert -crop 640x480x160x120 '+picpath+' '+picpath +
+                      ';convert -crop 640x480+160+120 '+picpath+' '+picpath +
                       ';convert -resize 480x360 '+picpath+' '+picpath)
 
             result = True
