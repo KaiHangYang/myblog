@@ -20,7 +20,7 @@ from tornado import (
 
 
 class MainApplication(web.Application):
-    def __init__(self, settings, db_info, article_path, dev):
+    def __init__(self, settings, db_info, article_path, shot_path, dev):
         route = [
             [r'/', MainHandler],
             [r'/admin', AdminHandler],
@@ -31,6 +31,7 @@ class MainApplication(web.Application):
             [r'/edit([0-9\.]*)', EditArticleHandler],
             [r'/article/([0-9\.]*)', ShowArticleHandler],
             [r'/manage', ArticleManageHandler],
+            [r'/pageshot', PageShotHandler]
         ]
 
         web.Application.__init__(self, route, **settings)
@@ -43,9 +44,10 @@ class MainApplication(web.Application):
         )
 
         self.article_path = article_path
+        self.shot_path = shot_path
+
         self.static_path = settings['static_path']
         self.dev = dev
-
 
 class BaseHandler(web.RequestHandler):
     @property
@@ -63,6 +65,10 @@ class BaseHandler(web.RequestHandler):
     @property
     def dev(self):
         return self.application.dev
+
+    @property
+    def shot_path(self):
+        return self.application.shot_path
 
     def get_current_user(self):
         user = self.get_secure_cookie('user_name')
@@ -247,6 +253,14 @@ class AddArticleHandler(BaseHandler):
                         '" %}{% block art_content %}'+markdown.markdown(article)+
                         '{% end %}')
                 f.close()
+                picname = md5.new()
+                picname.update(timestamp)
+                picname = picname.hexdigest()
+                picpath = os.path.join(self.shot_path, user, picname)
+
+                if os.path.exists(picpath):
+                    os.remove(picpath)
+
             else:
                 self.db.execute('INSERT INTO user_article '
                                 'VALUES(%s,%s,%s,%s,%s)', user, article,
@@ -270,8 +284,14 @@ class AddArticleHandler(BaseHandler):
                 self.db.execute('delete from user_article where account=%s '
                 'and timestamp=%s', user, timestamp)
                 fname = self.article_path+'/'+user+timestamp+'.html'
+                picname = md5.new()
+                picname.update(timestamp)
+                picname = picname.hexdigest()
+                picpath = os.path.join(self.shot_path, user, picname)
                 if os.path.exists(fname):
                     os.remove(fname)
+                if os.path.exists(picpath):
+                    os.remove(picpath)
         except:
             return False
         else:
@@ -377,9 +397,18 @@ class ArticleManageHandler(BaseHandler):
         try:
             self.db.execute('delete from user_article where '
                             'account=%s and timestamp=%s', user, timestamp)
+            picname = md5.new()
+            picname.update(timestamp)
+            picname = picname.hexdigest()
+            picpath = os.path.join(self.shot_path, user, timestamp)
+
             fname = os.path.join(self.article_path, user+timestamp+'.html')
+
             if os.path.exists(fname):
                 os.remove(fname)
+
+            if os.path.exists(picpath):
+                os.remove(picpath)
 
         except:
             return False
@@ -398,3 +427,60 @@ class ArticleManageHandler(BaseHandler):
                 return False
         except:
             return False
+
+
+class PageShotHandler(BaseHandler):
+    executor = futures.ThreadPoolExecutor(4)
+
+    @gen.coroutine
+    def get(self):
+        user = self.get_secure_cookie('owner_name')
+        timestamp = self.get_argument('timestamp')
+
+        picname = md5.new()
+        picname.update(timestamp)
+        picname = picname.hexdigest()
+
+        userdir = os.path.join(self.shot_path, user)
+        picpath = os.path.join(userdir, picname)
+
+        result = yield self.get_shot(user, userdir, picpath, timestamp)
+
+        if result['result']:
+            self.set_header('Content-Type', 'image/jpeg')
+            self.write(result['pic'])
+        else:
+            self.set_status('404', '没有这张图片啦 ╮(╯▽╰)╭')
+
+    @concurrent.run_on_executor
+    def get_shot(self, user, userdir, picpath, timestamp):
+
+        if not os.path.exists(userdir):
+            os.mkdir(userdir)
+
+        dbexist = self.get('select title from user_article where account=%s '
+                           'and timestamp=%s', user, timestamp)
+
+        if not os.path.exists(picpath) and dbexist:
+            os.system('xvfb-run cutycapt --url=http://localhost/article/' +
+                      timestamp+' --out='+picpath+'.jpg;mv '+picpath+'.jpg ' +
+                      picpath +
+                      ';convert -crop 640x480x160x120 '+picpath+' '+picpath +
+                      ';convert -resize 480x360 '+picpath+' '+picpath)
+
+            result = True
+
+        elif not dbexist:
+            if os.path.exists(picpath):
+                os.remove(picpath)
+            result = False
+        else:
+            result = True
+
+        if result:
+            with open(picpath, 'rb') as f:
+                pic = f.read()
+        else:
+            pic = None
+
+        return dict(result=result, pic=pic)

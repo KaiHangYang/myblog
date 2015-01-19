@@ -46,7 +46,7 @@
         var manage_cover = createDom('div', {class: 'manage_cover'}),
             del = createDom('span', {class: 'del'}),
             edit = createDom('span', {class: 'edit'}),
-            img = createDom('img', {class: 'essay_shot', src: '/shot?timestamp='+data.timestamp+'&title='+data.title});
+            img = createDom('img', {class: 'essay_shot', src: '/pageshot?timestamp='+data.timestamp});
 
         essay_shortcut.innerText = data.brief_intro;
         essay_shortcut.appendChild(img);
