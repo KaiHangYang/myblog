@@ -1,0 +1,9 @@
+{% extends "/root/Web/blog/template/showarticle.html" %}{% block art_content %}<h1>上面提到的问题已经解决了</h1>
+<ol>
+<li>
+<p>对于刚才的<code>403 forbidden</code>问题，因为查数据库的时候写错了。。。</p>
+</li>
+<li>
+<p>对于阻塞的问题，似乎同一时间只能运行一个xvfb进程（因为是开线程跑的。。具体不太清楚，这方面的知识还没学），解决办法是，在图片的异步处理上开线程池的时候只开一个线程就不会出问题了。</p>
+</li>
+</ol>{% end %}
