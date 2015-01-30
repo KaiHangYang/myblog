@@ -17,7 +17,7 @@ from tornado.options import (
 
 import application
 
-filename = os.path.dirname(__file__)
+filename = os.path.dirname(os.path.abspath(__file__))
 define('debug', default=True, type=bool, help='Open debug mode or '
        'not(default:enabled), false to disable it, true to enable it.')
 define('port', default=8000, type=int, help='Set the port '

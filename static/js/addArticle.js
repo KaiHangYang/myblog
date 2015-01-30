@@ -138,6 +138,7 @@ function init(){
                 contentType: 'json',
                 data: {article:$('.edit_block').value, title:$('#article_title').value, brief_intro:$('#brief_intro').value},
                 callback: function(data){
+                    console.log(data);
                     if (data.result) {
                         location.href = '/admin';
                     }

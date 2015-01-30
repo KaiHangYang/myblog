@@ -270,7 +270,8 @@ class AddArticleHandler(BaseHandler):
                         '{% block art_content %}'+markdown.markdown(article)+
                         '{% end %}')
                 f.close()
-        except:
+        except StandardError, e:
+            print e
             return False
         else:
             return True
@@ -291,7 +292,8 @@ class AddArticleHandler(BaseHandler):
                     os.remove(fname)
                 if os.path.exists(picpath):
                     os.remove(picpath)
-        except:
+        except StandardError, e:
+            print e
             return False
         else:
             return True
@@ -332,7 +334,8 @@ class EditArticleHandler(BaseHandler):
                 return {'success': True, 'content': result}
             else:
                 return {'success': False}
-        except:
+        except StandardError, e:
+            print e
             return {'success': False}
 
 
@@ -351,7 +354,7 @@ class ShowArticleHandler(BaseHandler):
                        'where account=%s and timestamp=%s', current_user,
                        timestamp)
         if article:
-            loader = template.Loader('')
+            loader = template.Loader('template')
             filename = os.path.join(self.article_path, article['account']+
                                     article['timestamp']+'.html')
             if not os.path.exists(filename):
@@ -417,7 +420,8 @@ class ArticleManageHandler(BaseHandler):
             if os.path.exists(picpath):
                 os.remove(picpath)
 
-        except:
+        except StandardError, e:
+            print e
             return False
         else:
             return True
@@ -432,7 +436,8 @@ class ArticleManageHandler(BaseHandler):
                 return result
             else:
                 return False
-        except:
+        except StandardError, e:
+            print e
             return False
 
 
@@ -470,7 +475,7 @@ class PageShotHandler(BaseHandler):
                            'and timestamp=%s', user, timestamp)
 
         if not os.path.exists(picpath) and dbexist:
-            os.system('xvfb-run cutycapt --url=http://localhost/article/' +
+            os.system('xvfb-run cutycapt --url=http://localhost:8000/article/'+
                       timestamp+' --out='+picpath+'.jpg;mv '+picpath+'.jpg ' +
                       picpath +
                       ';convert -crop 640x480+160+120 '+picpath+' '+picpath +
