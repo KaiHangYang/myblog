@@ -171,6 +171,16 @@ addClass = function(doms, classname) {
         doms[i].className += ' '+classname;
     }
 }
+addAttr = function(dom, attr) {
+    //attr 是一个对象
+    if (typeof attr != 'object') {
+        throw new Error('AttrError：传入的不是一个属性对象');
+    }
+
+    for (i in attr) {
+        dom.setAttribute(i, attr[i]);
+    }
+}
 removeClass = function(doms, classname) {
     if (!(doms instanceof NodeList)) {
         doms = new Array(doms);
@@ -218,4 +228,95 @@ eventTrigger = function(e, dom) {
     event.initEvent(e, true, true);
     dom.dispatchEvent(event);
     delete event;
+}
+
+//附加的函数 waterfall
+waterfall = {
+    init: function(){//这里使用wt-container作为waterfall的类名，wt-item作为waterfall子元素的类名
+        var container = $('.wt-container');
+        var items = $$('.wt-item');
+        var containerWidth = parseInt(css(container, 'width')),
+            itemWidth = parseInt(css(items[0], 'width'));
+        
+        var colNum = Math.floor(containerWidth/itemWidth);
+        var margin = (containerWidth-itemWidth*colNum)/(colNum+1);
+        var colLength = [], minNum, maxNum;
+        for (var i=0; i < colNum; i++) {
+            colLength.push(margin);
+        }
+        for (var i=0, maxNum=0; i < items.length; i++) {
+            for (var j=0, minNum=0; j < colLength.length; j++) {
+                if (colLength[minNum] == margin) {
+                    break;
+                }
+                minNum = (colLength[minNum] >= colLength[j] ? j:minNum);
+            }
+
+            items[i].style.top = colLength[minNum]+'px';
+            colLength[minNum] += parseInt(css(items[i], 'height')) + margin;
+            items[i].style.left = margin+(itemWidth+margin)*minNum+'px';
+            for (var j=0, maxNum=0; j < colLength.length; j++) {
+                maxNum = (colLength[maxNum] <= colLength[j] ? j:maxNum);
+            }
+            container.style.height = colLength[maxNum]+'px';
+        }
+
+    },
+    resize: function() {
+        clearTimeout(waterfall.timeout);
+        waterfall.timeout = setTimeout(function(){
+            waterfall.init();
+        }, 100);
+    },
+    timeout:-1
+}
+//一个状态条
+statusBar = {
+    barDom: '',
+    inited: false,
+    init: function(){
+
+        if (statusBar.inited) {
+            throw new Error('statusBar 重复初始化');
+        }
+
+        var innerSpan = createDom('span');
+        var statusDiv = createDom('div', {'class': 'status_bar'});
+        var textDiv = createDom('div');
+
+        statusDiv.appendChild(innerSpan);
+        statusDiv.appendChild(textDiv);
+
+        statusDiv.style.display = 'none';
+        statusDiv.style.opacity = 0;
+        statusBar.barDom = statusDiv;
+        document.documentElement.appendChild(statusDiv);
+        statusBar.inited = true;
+    },
+    show: function(text) {
+        if (!statusBar.inited) {
+            throw new Error('状态栏还没有初始化！');
+        }
+
+        var t = (typeof text == 'undefined')?"":text;
+
+        $('.status_bar>div').innerText = t;
+        statusBar.barDom.style.display = 'block';
+        statusBar.barDom.style.opacity = 1;
+    },
+    hide: function(time) {
+        if (!statusBar.inited) {
+            throw new Error('状态栏还没有初始化！');
+        }
+        var t = (typeof time == 'undefined')?0:time;
+
+        setTimeout(function(){
+            $('.status_bar>div').innerText = "";
+            statusBar.barDom.style.opacity = 0;
+
+            setTimeout(function(){
+                statusBar.barDom.style.display = 'none';
+            }, 1000);
+        }, t);
+    },
 }

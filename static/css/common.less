@@ -35,7 +35,7 @@ body, html, section, article, header, p, span, div, aside, ul, ol, li, textarea,
         transform: rotate(1turn);
     }
 }
-@-webkit-keyframes  bar {
+@-webkit-keyframes bar {
     50% {
         -webkit-transform: rotate(-0.5turn);
         background-color: #202020;
@@ -43,6 +43,27 @@ body, html, section, article, header, p, span, div, aside, ul, ol, li, textarea,
     }
     100% {
         -webkit-transform: rotate(-1turn);
+    }
+}
+@-webkit-keyframes status {
+    25% {
+        width: 60px;
+        box-shadow: 70px 0px 0px rgb(202, 84, 84);
+    }
+
+    50% {
+        width: 0px;
+        box-shadow: 200px 0px 0px transparent;
+    }
+
+    75% {
+        width: 60px;
+        box-shadow: 70px 0px 0px rgb(202, 84, 84);
+    }
+
+    100% {
+        width: 0px;
+        box-shadow: 0px 0px 0px transparent;
     }
 }
 .loading {
@@ -124,3 +145,35 @@ body, html, section, article, header, p, span, div, aside, ul, ol, li, textarea,
     font-size: 30px;
     padding-top: 6px;
 }
+
+.status_bar {
+    width: 200px;height: 35px;
+    border-radius: 3px 3px;
+    z-index: 1000;
+    position: fixed;
+    bottom: 20px;
+    left: 0;right: 0;
+    margin: auto;
+    background-color: rgba(12, 103, 168, 0.82);
+    -webkit-transition: opacity 300ms ease-in-out;
+    &>span {
+        border-radius: 3px 3px;
+        width: 0px;
+        height: 100%;
+        display: block;
+        background-color: transparent;
+        -webkit-animation: status 4s infinite linear;
+    }
+    &>div {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0px;
+        box-sizing: border-box;
+        padding-top: 8px;
+        text-align: center;
+        color: white;
+        z-index: 10;
+    }
+}
+

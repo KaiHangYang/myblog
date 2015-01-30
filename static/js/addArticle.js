@@ -28,6 +28,7 @@ function backspace(e, el) {
         $('.edit_block').oninput();
     }
 }
+    
 var makesure = {
     show: function(msg, okFunc, cancelFunc) {
         $('.makesure>div>span').innerHTML = msg;
@@ -49,6 +50,8 @@ var makesure = {
     }
 }
 function init(){
+    statusBar.init();
+
     (function(){
         if (location.pathname == '/addarticle') {
             return;
@@ -97,7 +100,10 @@ function init(){
         }
         else if (e.keyCode == 8) {
             backspace(e, $('.edit_block'));
-        } 
+        }
+        else if (e.keyCode == 83 && e.ctrlKey) {
+            e.preventDefault();
+        }
     });
     $('#article_title').onblur = function() {
         if (this.value != '') {
@@ -130,6 +136,13 @@ function init(){
         }
     });
     $('.back_bar').onclick = function() {
+
+        if (!$('.edit_block').value || !$('#article_title').value || !$('#brief_intro').value) {
+            makesure.show('填写不完整！', makesure.hide, makesure.hide);
+            return;
+        }
+        console.log(!$('.edit_block').value || !$('#article_title').value || !$('#brief_intro').value);
+
         makesure.show('保存并返回首页？', function(){
             makesure.hide();
             ajax({
@@ -169,7 +182,13 @@ function init(){
         }, makesure.hide);
     }
     $('.save_bar').onclick = function() {
-        $('.loading').style.display = 'block';
+        if (!$('.edit_block').value || !$('#article_title').value || !$('#brief_intro').value) {
+            statusBar.show('内容不全！');
+            statusBar.hide(1000);
+            return;
+        }
+
+        statusBar.show('正在保存中～');
         ajax({
             url: '/addarticle',
             method: 'post',
@@ -178,14 +197,29 @@ function init(){
             callback: function(data) {
                 if (data.result) {
                     $('.loading').style.display = 'none';
-                    makesure.show('保存成功～', makesure.hide, makesure.hide);
+                    statusBar.show('保存成功~');
+                    statusBar.hide(1000);
                 }
                 else {
                     $('.loading').style.display = 'none';
-                    makesure.show('保存失败了。。。', makesure.hide, makesure.hide);
+                    statusBar.show('保存失败了～');
+                    statusBar.hide(1000);
                 }
             }
         });
     }
+    window.addEventListener('keydown', function(e) {
+        if (e.keyCode == 83 && e.ctrlKey) {
+            e.preventDefault();
+
+            $('.save_bar').onclick();
+            
+        } 
+    });
+    setInterval(function() {
+        if (!!$('.edit_block').value && !!$('#article_title').value && !!$('#brief_intro').value) {
+            $('.save_bar').onclick();
+        }
+    }, 40000);
 }
 window.onload = init;

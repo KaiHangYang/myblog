@@ -1,43 +1,4 @@
 (function(){
-    var waterfall = {
-        init: function(){//这里使用wt-container作为waterfall的类名，wt-item作为waterfall子元素的类名
-            var container = $('.wt-container');
-            var items = $$('.wt-item');
-            var containerWidth = parseInt(css(container, 'width')),
-                itemWidth = parseInt(css(items[0], 'width'));
-            
-            var colNum = Math.floor(containerWidth/itemWidth);
-            var margin = (containerWidth-itemWidth*colNum)/(colNum+1);
-            var colLength = [], minNum, maxNum;
-            for (var i=0; i < colNum; i++) {
-                colLength.push(margin);
-            }
-            for (var i=0, maxNum=0; i < items.length; i++) {
-                for (var j=0, minNum=0; j < colLength.length; j++) {
-                    if (colLength[minNum] == margin) {
-                        break;
-                    }
-                    minNum = (colLength[minNum] >= colLength[j] ? j:minNum);
-                }
-
-                items[i].style.top = colLength[minNum]+'px';
-                colLength[minNum] += parseInt(css(items[i], 'height')) + margin;
-                items[i].style.left = margin+(itemWidth+margin)*minNum+'px';
-                for (var j=0, maxNum=0; j < colLength.length; j++) {
-                    maxNum = (colLength[maxNum] <= colLength[j] ? j:maxNum);
-                }
-                container.style.height = colLength[maxNum]+'px';
-            }
-
-        },
-        resize: function() {
-            clearTimeout(waterfall.timeout);
-            waterfall.timeout = setTimeout(function(){
-                waterfall.init();
-            }, 100);
-        },
-        timeout:-1
-    }
     
     function create_article(data) {
         var section = createDom('section', {class: 'essays wt-item', time_stamp: data.timestamp});
@@ -46,7 +7,13 @@
         var manage_cover = createDom('div', {class: 'manage_cover'}),
             del = createDom('span', {class: 'del'}),
             edit = createDom('span', {class: 'edit'}),
-            img = createDom('img', {class: 'essay_shot', src: '/pageshot?timestamp='+data.timestamp});
+            img = createDom('img', {class: 'essay_shot'});
+
+        img.addEventListener('load', function(){
+            eventTrigger('resize', window);
+            img.removeEventListener('load');
+        });
+        addAttr(img, {src: '/pageshot?timestamp='+data.timestamp});
 
         essay_shortcut.innerText = data.brief_intro;
         essay_shortcut.appendChild(img);
@@ -85,7 +52,7 @@
             }
         })
     }
-    function article_del(timestamp) {
+    function article_del(timestamp, nowScrollY) {
         ajax({
             url: '/manage',
             method: 'post',
@@ -95,6 +62,7 @@
                 if (data.success) {
                     init_article(function(){
                         $('#manage_bar').click();
+                        window.scrollTo(0, nowScrollY);
                     });
                 }
                 else {
@@ -139,11 +107,13 @@
         window.onresize = function() {
             waterfall.resize();
         }
+
         $('article').addEventListener('click', article_show);
         $('article').addEventListener('click', function(e) {
             if (e.target.className == 'del') {
+                var nowScrollY = window.scrollY;
                 e.stopPropagation();
-                article_del(e.target.parentNode.parentNode.getAttribute('time_stamp'));
+                article_del(e.target.parentNode.parentNode.getAttribute('time_stamp'), nowScrollY);
             }
             else if (e.target.className == 'edit') {
                 e.stopPropagation();
