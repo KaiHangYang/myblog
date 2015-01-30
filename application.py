@@ -20,7 +20,8 @@ from tornado import (
 
 
 class MainApplication(web.Application):
-    def __init__(self, settings, db_info, article_path, shot_path, dev):
+    def __init__(self, settings, db_info, article_path, template_path,
+                 shot_path, dev):
         route = [
             [r'/', MainHandler],
             [r'/admin', AdminHandler],
@@ -45,6 +46,7 @@ class MainApplication(web.Application):
 
         self.article_path = article_path
         self.shot_path = shot_path
+        self.template_path = template_path
 
         self.static_path = settings['static_path']
         self.dev = dev
@@ -69,6 +71,10 @@ class BaseHandler(web.RequestHandler):
     @property
     def shot_path(self):
         return self.application.shot_path
+
+    @property
+    def template_path(self):
+        return self.application.template_path
 
     def get_current_user(self):
         user = self.get_secure_cookie('user_name')
@@ -354,7 +360,7 @@ class ShowArticleHandler(BaseHandler):
                        'where account=%s and timestamp=%s', current_user,
                        timestamp)
         if article:
-            loader = template.Loader('template')
+            loader = template.Loader(self.template_path)
             filename = os.path.join(self.article_path, article['account']+
                                     article['timestamp']+'.html')
             if not os.path.exists(filename):

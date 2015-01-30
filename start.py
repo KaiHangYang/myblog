@@ -54,10 +54,11 @@ def main():
         db_host=options.db_host, db_name=options.db_name,
         db_user=options.db_user, db_pw=options.db_pw
     )
-    article_path = options.article_path
 
     app = application.MainApplication(settings, db_info,
-                                      article_path, options.shot_path,
+                                      options.article_path,
+                                      options.template_path,
+                                      options.shot_path,
                                       options.dev)
 
     server = httpserver.HTTPServer(app)
