@@ -481,11 +481,12 @@ class PageShotHandler(BaseHandler):
                            'and timestamp=%s', user, timestamp)
 
         if not os.path.exists(picpath) and dbexist:
-            os.system('xvfb-run cutycapt --url=http://localhost:8000/article/'+
+            os.system('xvfb-run --server-args="-screen 0, 1024x768x24" '
+                      'cutycapt --url=http://localhost:8000/article/' +
                       timestamp+' --out='+picpath+'.jpg;mv '+picpath+'.jpg ' +
                       picpath +
-                      ';convert -crop 640x480+160+120 '+picpath+' '+picpath +
-                      ';convert -resize 480x360 '+picpath+' '+picpath)
+                      ';convert -crop 845x600+0+150 '+picpath+' '+picpath +
+                      ';convert -resize 480x256 '+picpath+' '+picpath)
 
             result = True
 

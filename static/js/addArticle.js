@@ -78,7 +78,10 @@ function init(){
     })();
     var timeout = -1;
     $('.edit_block').onfocus = function() {
-        document.documentElement.scrollTop = 200;
+        //响应式
+        if (window.innerWidth >= 700) {
+            document.documentElement.scrollTop = 200;
+        }
     }
     $('.edit_block').oninput = function() {
         clearTimeout(timeout);

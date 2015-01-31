@@ -1,0 +1,1 @@
+@media screen and (max-width:1050px){.essays{width:44%}#main{width:100%}aside{display:none}#header_fixed{width:100%}}@media screen and (max-width:700px){.essays{width:80%}#header_unfixed{display:none;opacity:0}#header_fixed{display:block;opacity:1}article{margin-top:50px}}@media screen and (max-width:505px){#header_fixed>p{top:15px;font-size:23px}#header_fixed>span{top:-15px}}

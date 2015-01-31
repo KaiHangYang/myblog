@@ -2,8 +2,10 @@
 {% block head %}
     {% if dev %}
     <link rel="stylesheet/less" href="{{static_url('css/index.less')}}">
+    <link rel="stylesheet/less" href="{{static_url('css/commonResponse.less')}}">
     {% else %}
     <link rel="stylesheet" href="{{static_url('css/index.css')}}">
+    <link rel="stylesheet" href="{{static_url('css/commonResponse.css')}}">
     {% end %}
     <script src="{{static_url('js/indexCommon.js')}}"></script>
     {% if admin %}
