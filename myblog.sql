@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.5.40, for debian-linux-gnu (x86_64)
+-- MySQL dump 10.13  Distrib 5.5.41, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: blog
 -- ------------------------------------------------------
--- Server version	5.5.40-0ubuntu0.14.04.1
+-- Server version	5.5.41-0ubuntu0.14.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,6 +14,36 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `remark`
+--
+
+DROP TABLE IF EXISTS `remark`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `remark` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `pid` int(10) DEFAULT NULL,
+  `aid` varchar(32) NOT NULL,
+  `content` text,
+  `name` varchar(30) NOT NULL DEFAULT '匿名',
+  PRIMARY KEY (`id`),
+  KEY `aid` (`aid`),
+  KEY `pid` (`pid`),
+  CONSTRAINT `remark_ibfk_1` FOREIGN KEY (`aid`) REFERENCES `user_article` (`article_id`) ON DELETE CASCADE,
+  CONSTRAINT `remark_ibfk_2` FOREIGN KEY (`pid`) REFERENCES `remark` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `remark`
+--
+
+LOCK TABLES `remark` WRITE;
+/*!40000 ALTER TABLE `remark` DISABLE KEYS */;
+/*!40000 ALTER TABLE `remark` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `user`
@@ -55,6 +85,8 @@ CREATE TABLE `user_article` (
   `timestamp` varchar(15) NOT NULL,
   `title` varchar(30) NOT NULL,
   `brief_intro` varchar(100) NOT NULL,
+  `article_id` varchar(32) NOT NULL,
+  PRIMARY KEY (`article_id`),
   KEY `account` (`account`),
   CONSTRAINT `user_article_ibfk_1` FOREIGN KEY (`account`) REFERENCES `user` (`account`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -78,4 +110,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-01-30  5:51:30
+-- Dump completed on 2015-01-31 14:55:13

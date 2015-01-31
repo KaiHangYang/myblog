@@ -144,7 +144,6 @@ function init(){
             makesure.show('填写不完整！', makesure.hide, makesure.hide);
             return;
         }
-        console.log(!$('.edit_block').value || !$('#article_title').value || !$('#brief_intro').value);
 
         makesure.show('保存并返回首页？', function(){
             makesure.hide();

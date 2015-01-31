@@ -51,7 +51,10 @@ class MainApplication(web.Application):
         self.static_path = settings['static_path']
         self.dev = dev
 
+
 class BaseHandler(web.RequestHandler):
+    executor = futures.ThreadPoolExecutor(4)
+
     @property
     def db(self):
         return self.application.db
@@ -82,8 +85,135 @@ class BaseHandler(web.RequestHandler):
         return user
 
 
+class ArticleHandler(BaseHandler):
+    def make_article_id(self, user, timestamp):
+        aid = md5.new()
+        aid.update(user+timestamp)
+        aid = aid.hexdigest()
+
+        return aid
+
+    def get_article_id(self, user, timestamp):
+        result = self.db.get('select article_id from user_article where '
+                             'account=%s and timestamp=%s', user, timestamp)
+
+        if result:
+            return result['article_id']
+        else:
+            return None
+
+    def check_article(self, user_dir, filename, article):
+        if not os.path.exists(user_dir) or not os.path.isdir(user_dir):
+            os.mkdir(user_dir)
+
+        if not os.path.exists(filename):
+            with open(filename, 'w') as f:
+                f.write('{% extends "'+os.path.join(os.path.dirname(__file__),
+                        'template/showarticle.html')+'" %}'
+                        '{% block art_content %}'+markdown.markdown(article)+
+                        '{% end %}')
+
+    @concurrent.run_on_executor
+    def add_article(self, user, timestamp, title, brief_intro, article):
+        try:
+            article_id = self.make_article_id(user, timestamp)
+            fname = os.path.join(self.article_path, user, article_id)
+            if (not os.path.exists(self.article_path+'/'+user) or
+                not os.path.isdir(self.article_path+'/'+user)):
+                os.mkdir(self.article_path+'/'+user)
+            if self.db.get('select article_id from user_article '
+                           'where article_id=%s', article_id):
+                self.db.execute('update user_article '
+                                'set article=%s,title=%s,brief_intro=%s where'
+                                ' article_id=%s',
+                                article, title, brief_intro, article_id)
+                with open(fname, 'w') as f:
+                    f.write('{% extends "' +
+                            os.path.join(os.path.dirname(__file__),
+                                         'template/showarticle.html') +
+                                         '" %}{% block art_content %}' +
+                                         markdown.markdown(article) +
+                                         '{% end %}')
+
+                picpath = os.path.join(self.shot_path, user, article_id)
+
+                if os.path.exists(picpath):
+                    os.remove(picpath)
+
+            else:
+                self.db.execute('INSERT INTO user_article '
+                                'VALUES(%s,%s,%s,%s,%s, %s)', user, article,
+                                timestamp, title, brief_intro, article_id)
+
+                with open(fname, 'w') as f:
+                    f.write('{% extends "' +
+                            os.path.join(os.path.dirname(__file__),
+                            'template/showarticle.html')+'" %}'
+                            '{% block art_content %}' +
+                            markdown.markdown(article) +
+                            '{% end %}')
+        except StandardError, e:
+            print e
+            return False
+        else:
+            return True
+
+    @concurrent.run_on_executor
+    def delete_article(self, user, timestamp):
+        article_id = self.make_article_id(user, timestamp)
+
+        try:
+            if self.db.get('select article_id from user_article where '
+                           'article_id=%s', article_id):
+                self.db.execute('delete from user_article where account=%s '
+                                'and article_id=%s',
+                                user, article_id)
+
+                fname = os.path.join(self.article_path, user, article_id)
+                picpath = os.path.join(self.shot_path, user, article_id)
+
+                if os.path.exists(fname):
+                    os.remove(fname)
+                if os.path.exists(picpath):
+                    os.remove(picpath)
+
+        except StandardError, e:
+            print e
+            return False
+        else:
+            return True
+
+    @concurrent.run_on_executor
+    def edit_article(self, user, timestamp):
+        try:
+            result = self.get_article_id(user, timestamp)
+            if result:
+                return result
+            else:
+                return False
+        except StandardError, e:
+            print e
+            return False
+
+    @concurrent.run_on_executor
+    def get_article(self, user, timestamp):
+
+        article_id = self.get_article_id(user, timestamp)
+
+        if not article_id: return {'success': False}
+        try:
+            result = self.db.get('select title,brief_intro,article from '
+                                'user_article where article_id=%s', article_id)
+            if result:
+                return {'success': True, 'content': result}
+            else:
+                return {'success': False}
+        except StandardError, e:
+            print e
+            return {'success': False}
+
+
 class MainHandler(BaseHandler):
-    executor = futures.ThreadPoolExecutor(4)
 
     def get(self):
         # 这个只是临时这样的
@@ -108,35 +238,34 @@ class MainHandler(BaseHandler):
 
     @concurrent.run_on_executor
     def get_articles(self):
-        articles = self.db.query('select title,brief_intro,timestamp'
-                                 ' from user_article where account=%s',
-                                 self.get_secure_cookie('owner_name'))
 
-        articles = self.article_check(articles)
+        owner_name = self.get_secure_cookie('owner_name')
+        articles = self.db.query('select article_id,title,brief_intro,timestamp'
+                                 ' from user_article where account=%s',
+                                 owner_name)
+
+        articles = self.article_check(articles, owner_name)
         articles = dict(zip(range(len(articles)), articles))
         articles['length'] = len(articles)
         return articles
 
-    def article_check(self, article):
+    def article_check(self, article, owner_name):
         articles = []
-        owner_name = self.get_secure_cookie('owner_name')
         for i in article:
-            article_name = owner_name+i['timestamp']+'.html'
-            fname = os.path.join(self.article_path, article_name)
+            article_name = i['article_id']
+            fname = os.path.join(self.article_path, owner_name, article_name)
             if os.path.exists(fname):
                 articles.append(i)
             else:
                 content = self.db.query('select article from user_article '
-                                        'where account=%s and title=%s and '
-                                        'timestamp=%s', owner_name, i['title'],
-                                        i['timestamp'])[0]['article']
-                f = open(fname, 'w')
-                content = markdown.markdown(content)
-                f.write('{% extends "'+os.path.join(os.path.dirname(__file__),
-                        'template/showarticle.html')+
-                        '" %}{% block art_content %}' + content
-                        +'{% end %}')
-                f.close()
+                                        'where article_id=%s', i['article_id'])
+                with open(fname, 'w') as f:
+                    content = markdown.markdown(content)
+                    f.write('{% extends "'+os.path.join(os.path.dirname(__file__),
+                            'template/showarticle.html')+
+                            '" %}{% block art_content %}' + content
+                            +'{% end %}')
+
                 articles.append(i)
 
         return articles
@@ -158,8 +287,6 @@ class AdminHandler(MainHandler):
 
 
 class LoginHandler(BaseHandler):
-    executor = futures.ThreadPoolExecutor(4)
-
     def get(self):
         if self.get_secure_cookie('user_name'):
             self.redirect('/admin')
@@ -211,9 +338,7 @@ class RegisterHandler(BaseHandler):
         pass
 
 
-class AddArticleHandler(BaseHandler):
-    executor = futures.ThreadPoolExecutor(4)
-
+class AddArticleHandler(ArticleHandler):
     @web.authenticated
     def get(self):
         self.set_secure_cookie('timestamp', str(time.time()))
@@ -225,101 +350,36 @@ class AddArticleHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         self.check_xsrf_cookie()
+        timestamp = self.get_secure_cookie('timestamp')
+
         if self.request.headers['Content-Type'].startswith('application/json'):
             requestbody = escape.json_decode(self.request.body)
-            result = yield self.addArticle(self.current_user,
-                                           requestbody['article'],
-                                           requestbody['title'],
-                                           requestbody['brief_intro'])
+            result = yield self.add_article(self.current_user, timestamp,
+                                            requestbody['title'],
+                                            requestbody['brief_intro'],
+                                            requestbody['article'])
+
         elif self.request.body == 'delete':
-            result = yield self.deleteArticle(self.current_user,
-                     self.get_secure_cookie('timestamp'))
+            result = yield self.delete_article(self.current_user, timestamp)
         else:
             result = False
 
         self.write(dict(result=result))
         self.finish()
 
-    @concurrent.run_on_executor
-    def addArticle(self, user, article, title, brief_intro):
-        try:
-            timestamp = self.get_secure_cookie('timestamp')
-            fname = self.article_path+'/'+user+timestamp+'.html'
-            if self.db.get('select * from user_article '
-            'where account=%s and timestamp=%s',
-            user, timestamp):
-                self.db.execute('update user_article '
-                'set article=%s,title=%s,brief_intro=%s where'
-                ' account=%s and timestamp=%s'
-                , article, title, brief_intro, user, timestamp)
-                f = open(fname, 'w')
-                f.write('{% extends "'+os.path.join(os.path.dirname(__file__),
-                                                  'template/showarticle.html')+
-                        '" %}{% block art_content %}'+markdown.markdown(article)+
-                        '{% end %}')
-                f.close()
-                picname = md5.new()
-                picname.update(timestamp)
-                picname = picname.hexdigest()
-                picpath = os.path.join(self.shot_path, user, picname)
 
-                if os.path.exists(picpath):
-                    os.remove(picpath)
-
-            else:
-                self.db.execute('INSERT INTO user_article '
-                                'VALUES(%s,%s,%s,%s,%s)', user, article,
-                                timestamp, title, brief_intro)
-                f = open(fname, 'w')
-                f.write('{% extends "'+os.path.join(os.path.dirname(__file__),
-                        'template/showarticle.html')+'" %}'
-                        '{% block art_content %}'+markdown.markdown(article)+
-                        '{% end %}')
-                f.close()
-        except StandardError, e:
-            print e
-            return False
-        else:
-            return True
-
-    @concurrent.run_on_executor
-    def deleteArticle(self, user, timestamp):
-        try:
-            if self.db.get('select * from user_article where '
-            'account=%s and timestamp=%s', user, timestamp):
-                self.db.execute('delete from user_article where account=%s '
-                'and timestamp=%s', user, timestamp)
-                fname = self.article_path+'/'+user+timestamp+'.html'
-                picname = md5.new()
-                picname.update(timestamp)
-                picname = picname.hexdigest()
-                picpath = os.path.join(self.shot_path, user, picname)
-                if os.path.exists(fname):
-                    os.remove(fname)
-                if os.path.exists(picpath):
-                    os.remove(picpath)
-        except StandardError, e:
-            print e
-            return False
-        else:
-            return True
-
-
-class EditArticleHandler(BaseHandler):
-    executor = futures.ThreadPoolExecutor(4)
-
+class EditArticleHandler(ArticleHandler):
     @web.authenticated
     def get(self, timestamp):
-        if self.db.get('select account from user_article '
-                       'where account=%s and timestamp=%s', self.current_user,
-                       timestamp):
+        article_id = self.get_article_id(self.current_user, timestamp)
+        if article_id:
             self.set_secure_cookie('timestamp', timestamp)
             self.render('addArticle.html', user=self.current_user,
                         title='Edit Article', user_logo='wolf.png', admin=1,
                         dev=self.dev)
         else:
             self.set_status(404)
-            self.write('404 not found')
+            self.write('404 not found!')
 
     @web.authenticated
     @gen.coroutine
@@ -330,24 +390,11 @@ class EditArticleHandler(BaseHandler):
         result = yield self.get_article(account, timestamp)
         self.write(result)
 
-    @concurrent.run_on_executor
-    def get_article(self, account, timestamp):
-        try:
-            result = self.db.get('select title,brief_intro,article from '
-                                'user_article where account=%s and timestamp=%s',
-                                account, timestamp)
-            if result:
-                return {'success': True, 'content': result}
-            else:
-                return {'success': False}
-        except StandardError, e:
-            print e
-            return {'success': False}
 
-
-class ShowArticleHandler(BaseHandler):
+class ShowArticleHandler(ArticleHandler):
     def get(self, timestamp):
         query = 'select account from user where account=%s'
+
         if not self.current_user or not self.db.get(query, self.current_user):
             current_user = self.db.get('select * from user where admin=1'
                                        ' limit 1')['account']
@@ -356,21 +403,19 @@ class ShowArticleHandler(BaseHandler):
             current_user = self.current_user
             admin = 1
 
+        article_id = self.make_article_id(current_user, timestamp)
         article = self.db.get('select * from user_article '
-                       'where account=%s and timestamp=%s', current_user,
-                       timestamp)
+                       'where article_id=%s', article_id)
+
         if article:
             loader = template.Loader(self.template_path)
-            filename = os.path.join(self.article_path, article['account']+
-                                    article['timestamp']+'.html')
-            if not os.path.exists(filename):
-                with open(filename, 'w') as f:
-                    f.write('{% extends "'+os.path.join(os.path.dirname(__file__),
-                            'template/showarticle.html')+'" %}'
-                            '{% block art_content %}'+markdown.markdown(article)+
-                            '{% end %}')
-            self.write(loader.load(os.path.join(self.article_path,
-                current_user+timestamp+'.html')).generate(title=article['title']
+
+            user_dir = os.path.join(self.article_path, article['account'])
+            filename = os.path.join(user_dir, article['article_id'])
+
+            self.check_article(user_dir, filename, article['article'])
+
+            self.write(loader.load(filename).generate(title=article['title']
                 , static_url=self.static_url,
                 user_logo='wolf.png', admin=admin, dev=self.dev))
         else:
@@ -384,8 +429,7 @@ class ShowArticleHandler(BaseHandler):
             return '../'+'static/'+str
 
 
-class ArticleManageHandler(BaseHandler):
-    executor = futures.ThreadPoolExecutor(4)
+class ArticleManageHandler(ArticleHandler):
 
     @web.authenticated
     @gen.coroutine
@@ -393,58 +437,22 @@ class ArticleManageHandler(BaseHandler):
         self.check_xsrf_cookie()
         req = escape.json_decode(self.request.body)
         if req['act'] == 'del':
-            result = yield self.art_delete(self.current_user, req['timestamp'])
+            result = yield self.delete_article(self.current_user,
+                                               req['timestamp'])
             if result:
                 self.write({'success': True, 'act': req['act']})
             else:
                 self.write({'success': False, 'act': req['act']})
         elif req['act'] == 'edit':
-            result = yield self.art_edit(self.current_user, req['timestamp'])
-
+            result = yield self.edit_article(self.current_user,
+                                             req['timestamp'])
             if result:
-                self.write({'success': True, 'act': req['act'], 'content': result})
+                self.write({'success': True, 'act': req['act'],
+                            'content': {'timestamp': req['timestamp']}})
             else:
                 self.write({'success': False, 'act': req['act']})
         else:
             self.write({'success': False, 'act': req['act']})
-
-    @concurrent.run_on_executor
-    def art_delete(self, user, timestamp):
-        try:
-            self.db.execute('delete from user_article where '
-                            'account=%s and timestamp=%s', user, timestamp)
-            picname = md5.new()
-            picname.update(timestamp)
-            picname = picname.hexdigest()
-            picpath = os.path.join(self.shot_path, user, picname)
-
-            fname = os.path.join(self.article_path, user+timestamp+'.html')
-
-            if os.path.exists(fname):
-                os.remove(fname)
-
-            if os.path.exists(picpath):
-                os.remove(picpath)
-
-        except StandardError, e:
-            print e
-            return False
-        else:
-            return True
-
-    @concurrent.run_on_executor
-    def art_edit(self, user, timestamp):
-        try:
-            result = self.db.get('select timestamp from user_article where '
-                                 'account=%s and timestamp=%s', user,
-                                 timestamp)
-            if result:
-                return result
-            else:
-                return False
-        except StandardError, e:
-            print e
-            return False
 
 
 class PageShotHandler(BaseHandler):
@@ -456,7 +464,7 @@ class PageShotHandler(BaseHandler):
         timestamp = self.get_argument('timestamp')
 
         picname = md5.new()
-        picname.update(timestamp)
+        picname.update(user+timestamp)
         picname = picname.hexdigest()
 
         userdir = os.path.join(self.shot_path, user)
@@ -504,3 +512,14 @@ class PageShotHandler(BaseHandler):
             pic = None
 
         return dict(result=result, pic=pic)
+
+
+'''class RemarkHandler(BaseHandler):
+    executor = futures.ThreadPoolExecutor(4)
+
+    @gen.coroutine
+    def post(self):
+        req = escape.json_decode(self.request.body)
+
+        if req['method'] == 'get':
+'''
