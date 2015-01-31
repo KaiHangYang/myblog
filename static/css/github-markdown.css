@@ -44,11 +44,7 @@
 
 .markdown-body pre {
   overflow: auto;
-  margin-left: 10px;
-/*  position: relative;
-  left: 0;right: 0;
-  margin: auto;
-*/}
+}
 
 .markdown-body code,
 .markdown-body kbd,
